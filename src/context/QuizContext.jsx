@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 
 // États du quiz
 export const QuizState = {
@@ -47,6 +47,501 @@ export const QuizActionTypes = {
   CLEAR_ERROR: 'CLEAR_ERROR'
 };
 
+// Universités marocaines
+const UNIVERSITIES = [
+  { id: 1, name: 'Université Hassan II', acronym: 'UH2', city: 'Casablanca' },
+  { id: 2, name: 'Université Mohammed V', acronym: 'UM5', city: 'Rabat' },
+  { id: 3, name: 'Université Cadi Ayyad', acronym: 'UCA', city: 'Marrakech' },
+  { id: 4, name: 'Université Ibn Tofail', acronym: 'UIT', city: 'Kénitra' },
+  { id: 5, name: 'Université Abdelmalek Essaâdi', acronym: 'UAE', city: 'Tétouan' },
+  { id: 6, name: 'Université Sidi Mohamed Ben Abdellah', acronym: 'USMBA', city: 'Fès' },
+  { id: 7, name: 'Université Mohammed Premier', acronym: 'UMP', city: 'Oujda' },
+  { id: 8, name: 'Université Ibn Zohr', acronym: 'UIZ', city: 'Agadir' },
+  { id: 9, name: 'Université Sultan Moulay Slimane', acronym: 'USMS', city: 'Beni Mellal' },
+  { id: 10, name: 'Université Al Akhawayn', acronym: 'AUI', city: 'Ifrane' }
+];
+
+// Facultés par université
+const FACULTIES = [
+  { id: 1, name: 'Faculté des Sciences (FS)', universityId: 1 },
+  { id: 2, name: 'Faculté des Sciences et Techniques (FST)', universityId: 1 },
+  { id: 3, name: 'Faculté des Sciences Économiques (FSE)', universityId: 1 },
+  { id: 4, name: 'Faculté de Droit (FD)', universityId: 1 },
+  { id: 5, name: 'Faculté des Lettres et Sciences Humaines (FLSH)', universityId: 1 },
+  { id: 6, name: 'Faculté des Sciences (FS)', universityId: 2 },
+  { id: 7, name: 'École Nationale Supérieure d\'Informatique et d\'Analyse des Systèmes (ENSIAS)', universityId: 2 },
+  { id: 8, name: 'École Nationale Supérieure des Mines de Rabat (ENSMR)', universityId: 2 },
+  { id: 9, name: 'Faculté des Sciences Semlalia (FSSM)', universityId: 3 },
+  { id: 10, name: 'École Nationale des Sciences Appliquées (ENSA)', universityId: 3 },
+  { id: 11, name: 'Faculté des Sciences et Techniques (FST)', universityId: 3 },
+  { id: 12, name: 'Faculté des Sciences (FS)', universityId: 4 },
+  { id: 13, name: 'Faculté des Sciences Dhar El Mahraz (FSDM)', universityId: 6 },
+  { id: 14, name: 'École Nationale des Sciences Appliquées (ENSA)', universityId: 6 },
+  { id: 15, name: 'Faculté des Sciences (FS)', universityId: 8 },
+  { id: 16, name: 'École Nationale des Sciences Appliquées (ENSA)', universityId: 8 },
+  { id: 17, name: 'Faculté des Sciences et Techniques (FST)', universityId: 8 },
+  { id: 18, name: 'École Nationale de Commerce et de Gestion (ENCG)', universityId: 5 },
+  { id: 19, name: 'Faculté des Sciences Tétouan (FST)', universityId: 5 },
+  { id: 20, name: 'École Nationale d\'Agriculture de Meknès (ENAM)', universityId: 6 }
+];
+
+// Matières par faculté
+const SUBJECTS = [
+  // Mathématiques
+  { id: 1, name: 'Algèbre Linéaire', facultyIds: [1, 6, 9, 12, 15], level: 'S1-S2' },
+  { id: 2, name: 'Analyse Mathématique', facultyIds: [1, 6, 9, 12, 15], level: 'S1-S2' },
+  { id: 3, name: 'Probabilités et Statistiques', facultyIds: [1, 6, 9, 12, 15], level: 'S3-S4' },
+  { id: 4, name: 'Équations Différentielles', facultyIds: [1, 6, 9, 12, 15], level: 'S3-S4' },
+  { id: 5, name: 'Topologie', facultyIds: [1, 6, 9, 12, 15], level: 'S5-S6' },
+  
+  // Physique
+  { id: 6, name: 'Mécanique du Point', facultyIds: [1, 6, 9, 12, 15], level: 'S1-S2' },
+  { id: 7, name: 'Électromagnétisme', facultyIds: [1, 6, 9, 12, 15], level: 'S2-S3' },
+  { id: 8, name: 'Thermodynamique', facultyIds: [1, 6, 9, 12, 15], level: 'S3-S4' },
+  { id: 9, name: 'Mécanique Quantique', facultyIds: [1, 6, 9, 12, 15], level: 'S5-S6' },
+  { id: 10, name: 'Physique Nucléaire', facultyIds: [1, 6, 9, 12, 15], level: 'S5-S6' },
+  
+  // Chimie
+  { id: 11, name: 'Chimie Générale', facultyIds: [1, 6, 9, 12, 15], level: 'S1' },
+  { id: 12, name: 'Chimie Organique', facultyIds: [1, 6, 9, 12, 15], level: 'S2-S3' },
+  { id: 13, name: 'Chimie Analytique', facultyIds: [1, 6, 9, 12, 15], level: 'S3-S4' },
+  { id: 14, name: 'Chimie Minérale', facultyIds: [1, 6, 9, 12, 15], level: 'S4-S5' },
+  { id: 15, name: 'Chimie Physique', facultyIds: [1, 6, 9, 12, 15], level: 'S5-S6' },
+  
+  // Informatique
+  { id: 16, name: 'Algorithmique et Programmation', facultyIds: [1, 6, 7, 10, 14, 16], level: 'S1-S2' },
+  { id: 17, name: 'Structures de Données', facultyIds: [1, 6, 7, 10, 14, 16], level: 'S2-S3' },
+  { id: 18, name: 'Bases de Données', facultyIds: [1, 6, 7, 10, 14, 16], level: 'S3-S4' },
+  { id: 19, name: 'Réseaux Informatiques', facultyIds: [1, 6, 7, 10, 14, 16], level: 'S4-S5' },
+  { id: 20, name: 'Intelligence Artificielle', facultyIds: [1, 6, 7, 10, 14, 16], level: 'S5-S6' },
+  { id: 21, name: 'Sécurité Informatique', facultyIds: [7, 10, 14, 16], level: 'S5-S6' },
+  { id: 22, name: 'Développement Web', facultyIds: [7, 10, 14, 16], level: 'S4-S5' },
+  { id: 23, name: 'Systèmes d\'Exploitation', facultyIds: [1, 6, 7, 10, 14, 16], level: 'S3-S4' },
+  
+  // Biologie
+  { id: 24, name: 'Biologie Cellulaire', facultyIds: [1, 6, 9, 12, 15], level: 'S1-S2' },
+  { id: 25, name: 'Génétique', facultyIds: [1, 6, 9, 12, 15], level: 'S2-S3' },
+  { id: 26, name: 'Biochimie', facultyIds: [1, 6, 9, 12, 15], level: 'S3-S4' },
+  { id: 27, name: 'Microbiologie', facultyIds: [1, 6, 9, 12, 15], level: 'S4-S5' },
+  { id: 28, name: 'Biologie Moléculaire', facultyIds: [1, 6, 9, 12, 15], level: 'S5-S6' },
+  
+  // Économie et Gestion
+  { id: 29, name: 'Microéconomie', facultyIds: [3, 18], level: 'S1-S2' },
+  { id: 30, name: 'Macroéconomie', facultyIds: [3, 18], level: 'S2-S3' },
+  { id: 31, name: 'Comptabilité Générale', facultyIds: [3, 18], level: 'S1-S2' },
+  { id: 32, name: 'Finance d\'Entreprise', facultyIds: [3, 18], level: 'S4-S5' },
+  { id: 33, name: 'Marketing', facultyIds: [3, 18], level: 'S3-S4' },
+  { id: 34, name: 'Gestion des Ressources Humaines', facultyIds: [3, 18], level: 'S5-S6' },
+  
+  // Droit
+  { id: 35, name: 'Droit Constitutionnel', facultyIds: [4], level: 'S1-S2' },
+  { id: 36, name: 'Droit Civil', facultyIds: [4], level: 'S2-S3' },
+  { id: 37, name: 'Droit Commercial', facultyIds: [4], level: 'S3-S4' },
+  { id: 38, name: 'Droit Pénal', facultyIds: [4], level: 'S4-S5' },
+  { id: 39, name: 'Droit International', facultyIds: [4], level: 'S5-S6' },
+  
+  // Littérature et Philosophie
+  { id: 40, name: 'Philosophie Générale', facultyIds: [5], level: 'S1-S2' },
+  { id: 41, name: 'Littérature Française', facultyIds: [5], level: 'S2-S3' },
+  { id: 42, name: 'Littérature Arabe', facultyIds: [5], level: 'S3-S4' },
+  { id: 43, name: 'Linguistique', facultyIds: [5], level: 'S4-S5' },
+  { id: 44, name: 'Histoire de la Pensée', facultyIds: [5], level: 'S5-S6' },
+  
+  // Génie Civil
+  { id: 45, name: 'Résistance des Matériaux', facultyIds: [2, 10, 14, 16, 17], level: 'S2-S3' },
+  { id: 46, name: 'Mécanique des Sols', facultyIds: [2, 10, 14, 16, 17], level: 'S3-S4' },
+  { id: 47, name: 'Béton Armé', facultyIds: [2, 10, 14, 16, 17], level: 'S4-S5' },
+  { id: 48, name: 'Génie Parasismique', facultyIds: [2, 10, 14, 16, 17], level: 'S5-S6' },
+  
+  // Génie Électrique
+  { id: 49, name: 'Électricité Générale', facultyIds: [2, 10, 14, 16, 17], level: 'S1-S2' },
+  { id: 50, name: 'Électronique Analogique', facultyIds: [2, 10, 14, 16, 17], level: 'S3-S4' },
+  { id: 51, name: 'Électronique Numérique', facultyIds: [2, 10, 14, 16, 17], level: 'S4-S5' },
+  { id: 52, name: 'Automatique', facultyIds: [2, 10, 14, 16, 17], level: 'S5-S6' },
+  
+  // Génie Mécanique
+  { id: 53, name: 'Mécanique des Fluides', facultyIds: [2, 10, 14, 16, 17], level: 'S3-S4' },
+  { id: 54, name: 'Thermique', facultyIds: [2, 10, 14, 16, 17], level: 'S4-S5' },
+  { id: 55, name: 'Conception Mécanique', facultyIds: [2, 10, 14, 16, 17], level: 'S5-S6' },
+  
+  // Agriculture
+  { id: 56, name: 'Agronomie Générale', facultyIds: [20], level: 'S1-S2' },
+  { id: 57, name: 'Protection des Végétaux', facultyIds: [20], level: 'S3-S4' },
+  { id: 58, name: 'Génétique Végétale', facultyIds: [20], level: 'S4-S5' },
+  { id: 59, name: 'Économie Agricole', facultyIds: [20], level: 'S5-S6' },
+  
+  // Mines et Géologie
+  { id: 60, name: 'Géologie Générale', facultyIds: [8, 11, 17], level: 'S1-S2' },
+  { id: 61, name: 'Minéralogie', facultyIds: [8, 11, 17], level: 'S2-S3' },
+  { id: 62, name: 'Géologie Structurale', facultyIds: [8, 11, 17], level: 'S3-S4' },
+  { id: 63, name: 'Exploitation Minière', facultyIds: [8, 11, 17], level: 'S5-S6' },
+  
+  // Culture Générale
+  { id: 64, name: 'Histoire du Maroc', facultyIds: [], level: 'Tous niveaux' },
+  { id: 65, name: 'Géographie du Maroc', facultyIds: [], level: 'Tous niveaux' },
+  { id: 66, name: 'Culture Arabo-Musulmane', facultyIds: [], level: 'Tous niveaux' },
+  { id: 67, name: 'Actualité Internationale', facultyIds: [], level: 'Tous niveaux' },
+  { id: 68, name: 'Sciences et Technologies', facultyIds: [], level: 'Tous niveaux' }
+];
+
+// Génération des questions pour chaque matière
+const generateQuestionsForSubject = (subjectId, count = 10) => {
+  const subject = SUBJECTS.find(s => s.id === subjectId);
+  if (!subject) return [];
+  
+  const questions = [];
+  const questionTemplates = {
+    // Modèles de questions selon le type de matière
+    math: [
+      "Quelle est la solution de l'équation {equation} ?",
+      "Calculez la dérivée de la fonction {function}",
+      "Quelle est la valeur de {expression} ?",
+      "Résolvez le système d'équations : {system}",
+      "Quelle est la probabilité de {event} ?"
+    ],
+    physics: [
+      "Quelle est la formule pour calculer {concept} ?",
+      "Calculez {quantity} dans les conditions suivantes : {conditions}",
+      "Quel principe explique le phénomène suivant : {phenomenon} ?",
+      "Quelle est l'unité SI de {quantity} ?",
+      "Quelle loi physique s'applique dans cette situation : {situation} ?"
+    ],
+    chemistry: [
+      "Quelle est la formule chimique de {compound} ?",
+      "Équilibrez l'équation chimique suivante : {equation}",
+      "Quel est le produit de la réaction entre {reactant1} et {reactant2} ?",
+      "Quelle est la configuration électronique de {element} ?",
+      "Quel type de liaison chimique est présent dans {compound} ?"
+    ],
+    computer: [
+      "Quel est le résultat de l'algorithme suivant : {algorithm} ?",
+      "Quelle est la complexité de l'algorithme {algorithm} ?",
+      "Quelle structure de données est appropriée pour {scenario} ?",
+      "Corrigez l'erreur dans le code suivant : {code}",
+      "Quel est le résultat de l'expression {expression} ?"
+    ],
+    biology: [
+      "Quel est le rôle de {organelle} dans la cellule ?",
+      "Quelle est la différence entre {concept1} et {concept2} ?",
+      "Quel processus biologique est décrit par : {description} ?",
+      "Quelle est la fonction de {molecule} ?",
+      "Quelle structure est responsable de {function} ?"
+    ],
+    economics: [
+      "Quel est l'effet de {policy} sur {indicator} ?",
+      "Calculez {metric} à partir des données suivantes : {data}",
+      "Quelle théorie économique explique {phenomenon} ?",
+      "Quel est le principe de {concept} ?",
+      "Quelle décision prendre dans le cas suivant : {scenario} ?"
+    ],
+    law: [
+      "Quel article du code {code} s'applique dans cette situation : {situation} ?",
+      "Quelle est la différence entre {concept1} et {concept2} ?",
+      "Quelle juridiction est compétente pour {case} ?",
+      "Quel principe juridique s'applique à {situation} ?",
+      "Quelle est la peine prévue pour {infraction} ?"
+    ],
+    general: [
+      "Quelle est la capitale de {country} ?",
+      "Qui a découvert {discovery} ?",
+      "En quelle année a eu lieu {event} ?",
+      "Quel est le nom scientifique de {species} ?",
+      "Quelle est la formule pour calculer {formula} ?"
+    ]
+  };
+  
+  // Déterminer le type de matière
+  let questionType = 'general';
+  if (subjectId <= 5) questionType = 'math';
+  else if (subjectId <= 10) questionType = 'physics';
+  else if (subjectId <= 15) questionType = 'chemistry';
+  else if (subjectId <= 23) questionType = 'computer';
+  else if (subjectId <= 28) questionType = 'biology';
+  else if (subjectId <= 34) questionType = 'economics';
+  else if (subjectId <= 39) questionType = 'law';
+  
+  const templates = questionTemplates[questionType] || questionTemplates.general;
+  
+  for (let i = 0; i < count; i++) {
+    const template = templates[i % templates.length];
+    const questionText = template
+      .replace('{equation}', `x² + ${Math.floor(Math.random() * 10) + 1}x + ${Math.floor(Math.random() * 10)} = 0`)
+      .replace('{function}', `f(x) = x^${Math.floor(Math.random() * 3) + 2}`)
+      .replace('{expression}', `√${Math.floor(Math.random() * 100) + 1}`)
+      .replace('{system}', `x + y = ${Math.floor(Math.random() * 10) + 1}, x - y = ${Math.floor(Math.random() * 10) + 1}`)
+      .replace('{event}', `obtenir ${Math.floor(Math.random() * 6) + 1} avec un dé`)
+      .replace('{concept}', ['la vitesse', 'l\'accélération', 'la force', 'l\'énergie'][i % 4])
+      .replace('{conditions}', ['à 25°C', 'sous 1 atm', 'dans le vide', 'avec frottement'][i % 4])
+      .replace('{phenomenon}', ['la réfraction', 'l\'induction', 'la photosynthèse', 'la conduction'][i % 4])
+      .replace('{quantity}', ['la pression', 'la température', 'la masse', 'le volume'][i % 4])
+      .replace('{situation}', ['une chute libre', 'un circuit électrique', 'un gaz parfait', 'un mouvement circulaire'][i % 4])
+      .replace('{compound}', ['l\'eau', 'le dioxyde de carbone', 'le sel', 'le sucre'][i % 4])
+      .replace('{reactant1}', ['Na', 'HCl', 'H₂O', 'O₂'][i % 4])
+      .replace('{reactant2}', ['Cl', 'NaOH', 'CO₂', 'H₂'][i % 4])
+      .replace('{element}', ['l\'hydrogène', 'l\'oxygène', 'le carbone', 'l\'azote'][i % 4])
+      .replace('{algorithm}', ['le tri bulle', 'la recherche binaire', 'le parcours en profondeur', 'Dijkstra'][i % 4])
+      .replace('{scenario}', ['stocker des données hiérarchiques', 'rechercher rapidement', 'maintenir l\'ordre', 'gérer des priorités'][i % 4])
+      .replace('{code}', ['for(i=0;i<10;i++)', 'if(x==y)', 'while(true)', 'int x = "5"'][i % 4])
+      .replace('{organelle}', ['le noyau', 'les mitochondries', 'le réticulum endoplasmique', 'l\'appareil de Golgi'][i % 4])
+      .replace('{concept1}', ['la mitose', 'la transcription', 'l\'osmose', 'la respiration'][i % 4])
+      .replace('{concept2}', ['la méiose', 'la traduction', 'la diffusion', 'la photosynthèse'][i % 4])
+      .replace('{description}', ['la division cellulaire', 'la synthèse des protéines', 'le transport passif', 'la production d\'ATP'][i % 4])
+      .replace('{molecule}', ['l\'ADN', 'l\'ARN', 'les protéines', 'les enzymes'][i % 4])
+      .replace('{policy}', ['une hausse des taux d\'intérêt', 'une baisse des impôts', 'une augmentation des dépenses publiques', 'une dévaluation'][i % 4])
+      .replace('{indicator}', ['l\'inflation', 'le chômage', 'la croissance', 'le déficit'][i % 4])
+      .replace('{metric}', ['le PIB', 'l\'inflation', 'le taux de chômage', 'le déficit budgétaire'][i % 4])
+      .replace('{data}', ['consommation = 500, investissement = 200', 'exportations = 300, importations = 400'][i % 2])
+      .replace('{code}', ['civil', 'pénal', 'commercial', 'du travail'][i % 4])
+      .replace('{situation}', ['un contrat de vente', 'un accident de la route', 'un litige commercial', 'un licenciement'][i % 4])
+      .replace('{case}', ['un divorce', 'un vol', 'une faillite', 'un conflit de travail'][i % 4])
+      .replace('{infraction}', ['le vol simple', 'l\'escroquerie', 'les coups et blessures', 'la corruption'][i % 4])
+      .replace('{country}', ['la France', 'l\'Espagne', 'l\'Algérie', 'les États-Unis'][i % 4])
+      .replace('{discovery}', ['la pénicilline', 'la gravité', 'l\'électricité', 'la relativité'][i % 4])
+      .replace('{event}', ['l\'indépendance du Maroc', 'la Révolution française', 'la Première Guerre mondiale', 'la chute du mur de Berlin'][i % 4])
+      .replace('{species}', ['l\'être humain', 'le lion', 'le chêne', 'la rose'][i % 4])
+      .replace('{formula}', ['l\'aire d\'un cercle', 'le volume d\'une sphère', 'la vitesse moyenne', 'l\'énergie cinétique'][i % 4]);
+    
+    // Générer des options
+    const options = [];
+    const correctAnswerIndex = Math.floor(Math.random() * 4);
+    
+    for (let j = 0; j < 4; j++) {
+      if (j === correctAnswerIndex) {
+        // Réponse correcte (simplifiée pour l'exemple)
+        options.push(getCorrectAnswerForQuestion(questionText, subjectId));
+      } else {
+        // Réponses incorrectes
+        options.push(getIncorrectAnswerForQuestion(questionText, subjectId, j));
+      }
+    }
+    
+    questions.push({
+      id: `${subjectId}_${i + 1}`,
+      subjectId,
+      question: `${subject.name} - ${questionText}`,
+      options,
+      correctAnswer: correctAnswerIndex,
+      explanation: getExplanationForQuestion(questionText, subjectId),
+      difficulty: ['easy', 'medium', 'hard'][Math.floor(Math.random() * 3)],
+      points: Math.floor(Math.random() * 3) + 1,
+      timeEstimate: Math.floor(Math.random() * 120) + 30, // 30-150 secondes
+      tags: [subject.name, subject.level, ...getTagsForSubject(subjectId)],
+      imageUrl: Math.random() > 0.7 ? getImageForSubject(subjectId) : null,
+      formula: Math.random() > 0.5 ? getFormulaForSubject(subjectId) : null
+    });
+  }
+  
+  return questions;
+};
+
+// Fonctions utilitaires pour générer des réponses et explications
+const getCorrectAnswerForQuestion = (question, subjectId) => {
+  // Logique simplifiée pour générer des réponses correctes
+  if (question.includes('équation')) return 'x = 2';
+  if (question.includes('dérivée')) return '2x';
+  if (question.includes('probabilité')) return '1/6';
+  if (question.includes('formule')) return 'F = ma';
+  if (question.includes('unité SI')) return 'Newton';
+  if (question.includes('formule chimique')) return 'H₂O';
+  if (question.includes('algorithme')) return 'O(n log n)';
+  if (question.includes('structure de données')) return 'Arbre binaire';
+  if (question.includes('rôle')) return 'Contrôle cellulaire';
+  if (question.includes('effet')) return 'Augmentation';
+  if (question.includes('article')) return 'Article 1101';
+  if (question.includes('capitale')) return 'Rabat';
+  if (question.includes('découvert')) return 'Alexander Fleming';
+  return 'Réponse correcte';
+};
+
+const getIncorrectAnswerForQuestion = (question, subjectId, index) => {
+  const incorrectAnswers = [
+    'x = -2',
+    'x²',
+    '1/3',
+    'F = mv',
+    'Joule',
+    'CO₂',
+    'O(n²)',
+    'Liste chaînée',
+    'Stockage d\'énergie',
+    'Diminution',
+    'Article 1201',
+    'Casablanca',
+    'Louis Pasteur'
+  ];
+  return incorrectAnswers[(subjectId + index) % incorrectAnswers.length];
+};
+
+const getExplanationForQuestion = (question, subjectId) => {
+  const explanations = [
+    'La solution est obtenue en appliquant la formule quadratique.',
+    'La dérivée se calcule en utilisant les règles de dérivation standard.',
+    'La probabilité est calculée en divisant le nombre de cas favorables par le nombre total de cas.',
+    'Cette formule est une conséquence directe de la deuxième loi de Newton.',
+    'Le Newton est l\'unité SI de la force dans le système international.',
+    'La molécule d\'eau est composée de deux atomes d\'hydrogène et d\'un atome d\'oxygène.',
+    'La complexité est déterminée par le nombre d\'opérations élémentaires.',
+    'Cette structure permet un accès rapide aux données grâce à sa propriété d\'ordre.',
+    'Cet organite contient l\'ADN et contrôle les activités cellulaires.',
+    'Cette politique a un effet expansionniste sur l\'économie selon la théorie keynésienne.',
+    'Cet article définit les conditions de validité d\'un contrat en droit marocain.',
+    'Rabat est la capitale administrative du Maroc depuis 1912.',
+    'Cette découverte a révolutionné la médecine moderne.'
+  ];
+  return explanations[subjectId % explanations.length];
+};
+
+const getTagsForSubject = (subjectId) => {
+  const tagGroups = {
+    math: ['calcul', 'équations', 'algèbre'],
+    physics: ['sciences', 'expérimental', 'théorie'],
+    chemistry: ['laboratoire', 'réactions', 'molécules'],
+    computer: ['programmation', 'technologie', 'logiciel'],
+    biology: ['vivant', 'cellules', 'évolution'],
+    economics: ['argent', 'marché', 'entreprise'],
+    law: ['justice', 'loi', 'contrat'],
+    general: ['culture', 'savoir', 'connaissance']
+  };
+  
+  if (subjectId <= 5) return tagGroups.math;
+  if (subjectId <= 10) return tagGroups.physics;
+  if (subjectId <= 15) return tagGroups.chemistry;
+  if (subjectId <= 23) return tagGroups.computer;
+  if (subjectId <= 28) return tagGroups.biology;
+  if (subjectId <= 34) return tagGroups.economics;
+  if (subjectId <= 39) return tagGroups.law;
+  return tagGroups.general;
+};
+
+const getImageForSubject = (subjectId) => {
+  const images = {
+    math: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400',
+    physics: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w-400',
+    chemistry: 'https://images.unsplash.com/photo-1603123853880-a92fafb7809f?w=400',
+    computer: 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=400',
+    biology: 'https://images.unsplash.com/photo-1530021232320-687d8e3dba5e?w=400'
+  };
+  
+  if (subjectId <= 5) return images.math;
+  if (subjectId <= 10) return images.physics;
+  if (subjectId <= 15) return images.chemistry;
+  if (subjectId <= 23) return images.computer;
+  if (subjectId <= 28) return images.biology;
+  return null;
+};
+
+const getFormulaForSubject = (subjectId) => {
+  if (subjectId <= 5) return 'x = [-b ± √(b² - 4ac)] / 2a';
+  if (subjectId <= 10) return 'F = ma';
+  if (subjectId <= 15) return 'PV = nRT';
+  if (subjectId <= 23) return 'T(n) = O(n log n)';
+  if (subjectId <= 28) return 'ADN → ARN → Protéine';
+  return null;
+};
+
+// Génération des quizzes
+const generateQuizzes = () => {
+  const quizzes = [];
+  let quizId = 1;
+  
+  // Parcourir toutes les matières
+  SUBJECTS.forEach(subject => {
+    // Créer 2-3 quizzes par matière avec différents niveaux de difficulté
+    for (let i = 0; i < Math.floor(Math.random() * 2) + 2; i++) {
+      const facultyId = subject.facultyIds.length > 0 
+        ? subject.facultyIds[Math.floor(Math.random() * subject.facultyIds.length)]
+        : null;
+      
+      const faculty = FACULTIES.find(f => f.id === facultyId);
+      const university = faculty ? UNIVERSITIES.find(u => u.id === faculty.universityId) : null;
+      
+      const questionsCount = Math.floor(Math.random() * 15) + 10; // 10-25 questions
+      const duration = Math.floor(questionsCount * 1.5); // 1.5 minutes par question
+      const participants = Math.floor(Math.random() * 5000) + 100;
+      const rating = (Math.random() * 1.5 + 3.5).toFixed(1); // 3.5-5.0
+      
+      const isPaid = Math.random() > 0.6; // 40% gratuits, 60% payants
+      
+      quizzes.push({
+        id: quizId++,
+        title: `${subject.name} - ${['Test Diagnostique', 'Examen Blanc', 'Quiz de Révision', 'Contrôle Continu'][i % 4]} ${subject.level}`,
+        description: `Quiz complet sur ${subject.name} pour le niveau ${subject.level}. Idéal pour la préparation aux examens.`,
+        subject: subject.name,
+        subjectId: subject.id,
+        university: university ? university.name : 'Université Marocaine',
+        universityId: university ? university.id : null,
+        faculty: faculty ? faculty.name : null,
+        facultyId: facultyId,
+        level: subject.level,
+        questionsCount,
+        duration,
+        participants,
+        difficulty: ['easy', 'medium', 'hard', 'expert'][Math.floor(Math.random() * 4)],
+        rating: parseFloat(rating),
+        isPro: Math.random() > 0.7,
+        isPaid: isPaid,
+        price: isPaid ? 99 : 0,
+        isCompleted: Math.random() > 0.5,
+        bestScore: Math.random() > 0.3 ? Math.floor(Math.random() * 30) + 70 : null, // 70-100%
+        currentScore: Math.random() > 0.4 ? Math.floor(Math.random() * 30) + 60 : null, // 60-90%
+        completionRate: Math.floor(Math.random() * 30) + 70, // 70-100%
+        averageScore: Math.floor(Math.random() * 30) + 60, // 60-90%
+        tags: [...getTagsForSubject(subject.id), subject.level, 'révision', 'examen', isPaid ? 'premium' : 'gratuit'],
+        createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+        author: ['Dr. Ahmed Benali', 'Prof. Fatima Zahra', 'Dr. Youssef Alami', 'Prof. Leila Idrissi'][Math.floor(Math.random() * 4)],
+        popularity: ['trending', 'hot', 'new', 'popular'][Math.floor(Math.random() * 4)],
+        streakRequired: Math.random() > 0.8 ? Math.floor(Math.random() * 5) + 3 : null,
+        timeRecord: Math.random() > 0.7 ? Math.floor(Math.random() * duration * 60) : null,
+        isBookmarked: Math.random() > 0.7,
+        isLiked: Math.random() > 0.6,
+        likes: Math.floor(Math.random() * 100),
+        shares: Math.floor(Math.random() * 50),
+        questions: generateQuestionsForSubject(subject.id, questionsCount)
+      });
+    }
+  });
+  
+  // Ajouter des quizzes transversaux
+  for (let i = 0; i < 20; i++) {
+    quizzes.push({
+      id: quizId++,
+      title: ['Culture Générale Marocaine', 'Histoire du Maroc', 'Géographie Nationale', 'Actualité Internationale'][i % 4],
+      description: 'Testez vos connaissances générales sur le Maroc et le monde.',
+      subject: 'Culture Générale',
+      subjectId: 64 + (i % 5),
+      university: null,
+      universityId: null,
+      faculty: null,
+      facultyId: null,
+      level: 'Tous niveaux',
+      questionsCount: 20,
+      duration: 30,
+      participants: Math.floor(Math.random() * 10000) + 1000,
+      difficulty: ['easy', 'medium'][Math.floor(Math.random() * 2)],
+      rating: (Math.random() * 1.2 + 3.8).toFixed(1),
+      isPro: false,
+      isCompleted: Math.random() > 0.3,
+      bestScore: Math.random() > 0.2 ? Math.floor(Math.random() * 30) + 70 : null,
+      currentScore: Math.random() > 0.3 ? Math.floor(Math.random() * 30) + 60 : null,
+      completionRate: Math.floor(Math.random() * 40) + 60,
+      averageScore: Math.floor(Math.random() * 35) + 55,
+      tags: ['culture', 'général', 'maroc', 'monde', 'savoir'],
+      createdAt: new Date(Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
+      author: ['Institut National', 'Ministère de la Culture', 'Organisation UNESCO'][Math.floor(Math.random() * 3)],
+      popularity: ['trending', 'popular'][Math.floor(Math.random() * 2)],
+      streakRequired: null,
+      timeRecord: null,
+      isBookmarked: Math.random() > 0.8,
+      isLiked: Math.random() > 0.7,
+      likes: Math.floor(Math.random() * 200) + 50,
+      shares: Math.floor(Math.random() * 100) + 20,
+      questions: generateQuestionsForSubject(64 + (i % 5), 20)
+    });
+  }
+  
+  return quizzes;
+};
+
 // State initial
 const initialState = {
   // État général
@@ -55,7 +550,7 @@ const initialState = {
   error: null,
   
   // Liste des quizzes
-  quizzes: [],
+  quizzes: generateQuizzes(),
   filteredQuizzes: [],
   
   // Quiz en cours
@@ -100,42 +595,47 @@ const initialState = {
     totalTimeSpent: 0,
     bestScore: 0,
     quizzesCompleted: 0
+  },
+  
+  // Données de référence
+  universities: UNIVERSITIES,
+  faculties: FACULTIES,
+  subjects: SUBJECTS,
+  
+  // Métadonnées
+  metadata: {
+    totalQuizzes: 0,
+    totalQuestions: 0,
+    totalSubjects: SUBJECTS.length,
+    totalUniversities: UNIVERSITIES.length
   }
 };
 
 // Reducer
 const quizReducer = (state, action) => {
   switch (action.type) {
-    // === CHARGEMENT DES DONNÉES ===
     case QuizActionTypes.SET_LOADING:
-      return {
-        ...state,
-        loading: action.payload
-      };
+      return { ...state, loading: action.payload };
 
     case QuizActionTypes.SET_QUIZZES:
-      return {
-        ...state,
+      return { 
+        ...state, 
         quizzes: action.payload,
         filteredQuizzes: action.payload,
-        loading: false
+        metadata: {
+          ...state.metadata,
+          totalQuizzes: action.payload.length,
+          totalQuestions: action.payload.reduce((sum, quiz) => sum + quiz.questionsCount, 0)
+        },
+        loading: false 
       };
 
     case QuizActionTypes.SET_CURRENT_QUIZ:
-      return {
-        ...state,
-        currentQuiz: action.payload,
-        loading: false
-      };
+      return { ...state, currentQuiz: action.payload, loading: false };
 
     case QuizActionTypes.SET_QUESTIONS:
-      return {
-        ...state,
-        currentQuestions: action.payload,
-        loading: false
-      };
+      return { ...state, currentQuestions: action.payload, loading: false };
 
-    // === GESTION DU QUIZ EN COURS ===
     case QuizActionTypes.START_QUIZ:
       const startTime = new Date().toISOString();
       return {
@@ -147,12 +647,14 @@ const quizReducer = (state, action) => {
         timeSpent: 0,
         currentAttempt: {
           id: `attempt_${Date.now()}`,
+          quizId: action.payload.quizId,
           score: 0,
           correctAnswers: 0,
           totalQuestions: action.payload.questions.length,
           status: 'in_progress',
           answers: [],
-          startTime: startTime
+          startTime: startTime,
+          questions: action.payload.questions.map(q => ({ id: q.id, points: q.points }))
         }
       };
 
@@ -161,7 +663,6 @@ const quizReducer = (state, action) => {
       const newUserAnswers = [...state.userAnswers];
       const newAttemptAnswers = [...state.currentAttempt.answers];
       
-      // Mettre à jour ou ajouter la réponse
       const existingAnswerIndex = newUserAnswers.findIndex(
         answer => answer.questionId === questionId
       );
@@ -171,7 +672,8 @@ const quizReducer = (state, action) => {
         selectedAnswer,
         isCorrect,
         timeSpent,
-        answeredAt: new Date().toISOString()
+        answeredAt: new Date().toISOString(),
+        questionIndex: state.currentQuestionIndex
       };
       
       if (existingAnswerIndex >= 0) {
@@ -182,10 +684,15 @@ const quizReducer = (state, action) => {
         newAttemptAnswers.push(answerData);
       }
       
-      // Calculer le score
       const correctAnswers = newUserAnswers.filter(answer => answer.isCorrect).length;
-      const score = state.currentQuestions.length > 0 
-        ? Math.round((correctAnswers / state.currentQuestions.length) * 100)
+      const totalPossiblePoints = state.currentQuestions.reduce((sum, q) => sum + (q.points || 1), 0);
+      const earnedPoints = newUserAnswers.reduce((sum, answer) => {
+        const question = state.currentQuestions.find(q => q.id === answer.questionId);
+        return sum + (answer.isCorrect ? (question?.points || 1) : 0);
+      }, 0);
+      
+      const score = totalPossiblePoints > 0 
+        ? Math.round((earnedPoints / totalPossiblePoints) * 100)
         : 0;
       
       return {
@@ -195,7 +702,8 @@ const quizReducer = (state, action) => {
           ...state.currentAttempt,
           answers: newAttemptAnswers,
           correctAnswers,
-          score
+          score,
+          earnedPoints
         }
       };
 
@@ -229,14 +737,32 @@ const quizReducer = (state, action) => {
 
     case QuizActionTypes.COMPLETE_QUIZ:
       const completionTime = new Date().toISOString();
+      const finalAttempt = {
+        ...state.currentAttempt,
+        status: 'completed',
+        endTime: completionTime,
+        timeSpent: state.timeSpent,
+        totalTime: state.timeSpent,
+        accuracy: state.currentAttempt.totalQuestions > 0 
+          ? (state.currentAttempt.correctAnswers / state.currentAttempt.totalQuestions) * 100
+          : 0
+      };
+      
       return {
         ...state,
         status: QuizState.COMPLETED,
-        currentAttempt: {
-          ...state.currentAttempt,
-          status: 'completed',
-          endTime: completionTime,
-          timeSpent: state.timeSpent
+        currentAttempt: finalAttempt,
+        userAttempts: [...state.userAttempts, finalAttempt],
+        statistics: {
+          ...state.statistics,
+          totalQuizzesTaken: state.statistics.totalQuizzesTaken + 1,
+          quizzesCompleted: state.statistics.quizzesCompleted + 1,
+          totalTimeSpent: state.statistics.totalTimeSpent + state.timeSpent,
+          averageScore: state.statistics.totalQuizzesTaken > 0
+            ? (state.statistics.averageScore * state.statistics.totalQuizzesTaken + finalAttempt.score) / 
+              (state.statistics.totalQuizzesTaken + 1)
+            : finalAttempt.score,
+          bestScore: Math.max(state.statistics.bestScore, finalAttempt.score)
         }
       };
 
@@ -250,67 +776,33 @@ const quizReducer = (state, action) => {
         currentAttempt: initialState.currentAttempt
       };
 
-    // === TIMER ET PROGRESSION ===
     case QuizActionTypes.UPDATE_TIMER:
-      return {
-        ...state,
-        timeSpent: state.timeSpent + 1
-      };
+      return { ...state, timeSpent: state.timeSpent + 1 };
 
     case QuizActionTypes.SET_TIME_SPENT:
-      return {
-        ...state,
-        timeSpent: action.payload
-      };
+      return { ...state, timeSpent: action.payload };
 
-    // === RÉSULTATS ET STATISTIQUES ===
     case QuizActionTypes.SET_RESULTS:
-      return {
-        ...state,
-        results: action.payload,
-        status: QuizState.REVIEW
-      };
+      return { ...state, results: action.payload, status: QuizState.REVIEW };
 
     case QuizActionTypes.SAVE_ATTEMPT:
-      const newAttempts = [...state.userAttempts, action.payload];
-      return {
-        ...state,
-        userAttempts: newAttempts
-      };
+      return { ...state, userAttempts: [...state.userAttempts, action.payload] };
 
     case QuizActionTypes.UPDATE_LEADERBOARD:
-      return {
-        ...state,
-        leaderboard: action.payload
-      };
+      return { ...state, leaderboard: action.payload };
 
-    // === FILTRES ET RECHERCHE ===
     case QuizActionTypes.SET_FILTERS:
       const newFilters = { ...state.filters, ...action.payload };
-      return {
-        ...state,
-        filters: newFilters
-      };
+      return { ...state, filters: newFilters };
 
     case QuizActionTypes.SET_SEARCH_QUERY:
-      return {
-        ...state,
-        searchQuery: action.payload
-      };
+      return { ...state, searchQuery: action.payload };
 
-    // === GESTION DES ERREURS ===
     case QuizActionTypes.SET_ERROR:
-      return {
-        ...state,
-        error: action.payload,
-        loading: false
-      };
+      return { ...state, error: action.payload, loading: false };
 
     case QuizActionTypes.CLEAR_ERROR:
-      return {
-        ...state,
-        error: null
-      };
+      return { ...state, error: null };
 
     default:
       return state;
@@ -333,14 +825,86 @@ export const useQuiz = () => {
 export const QuizProvider = ({ children }) => {
   const [state, dispatch] = useReducer(quizReducer, initialState);
 
+  // Filtrage des quizzes
+  const filterQuizzes = useCallback(() => {
+    let filtered = state.quizzes;
+
+    // Filtre par recherche
+    if (state.searchQuery) {
+      const query = state.searchQuery.toLowerCase();
+      filtered = filtered.filter(quiz =>
+        quiz.title.toLowerCase().includes(query) ||
+        quiz.description.toLowerCase().includes(query) ||
+        quiz.tags.some(tag => tag.toLowerCase().includes(query)) ||
+        quiz.subject.toLowerCase().includes(query)
+      );
+    }
+
+    // Filtres par critères
+    if (state.filters.university) {
+      filtered = filtered.filter(quiz => 
+        quiz.universityId === state.filters.university
+      );
+    }
+
+    if (state.filters.faculty) {
+      filtered = filtered.filter(quiz => 
+        quiz.facultyId === state.filters.faculty
+      );
+    }
+
+    if (state.filters.subject) {
+      filtered = filtered.filter(quiz => 
+        quiz.subjectId === state.filters.subject
+      );
+    }
+
+    if (state.filters.level) {
+      filtered = filtered.filter(quiz => 
+        quiz.level === state.filters.level
+      );
+    }
+
+    if (state.filters.difficulty) {
+      filtered = filtered.filter(quiz => 
+        quiz.difficulty === state.filters.difficulty
+      );
+    }
+
+    if (state.filters.isPaid !== null && state.filters.isPaid !== undefined) {
+      filtered = filtered.filter(quiz => 
+        quiz.isPaid === state.filters.isPaid
+      );
+    }
+
+    return filtered;
+  }, [state.quizzes, state.filters, state.searchQuery]);
+
+  // Effet pour filtrer les quizzes
+  useEffect(() => {
+    const filtered = filterQuizzes();
+    dispatch({ type: QuizActionTypes.SET_QUIZZES, payload: filtered });
+  }, [filterQuizzes]);
+
+  // Timer automatique
+  useEffect(() => {
+    let timer;
+    
+    if (state.status === QuizState.IN_PROGRESS) {
+      timer = setInterval(() => {
+        dispatch({ type: QuizActionTypes.UPDATE_TIMER });
+      }, 1000);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [state.status]);
+
   // Actions
   const actions = {
-    // Chargement des données
     setLoading: (loading) => 
       dispatch({ type: QuizActionTypes.SET_LOADING, payload: loading }),
-
-    setQuizzes: (quizzes) => 
-      dispatch({ type: QuizActionTypes.SET_QUIZZES, payload: quizzes }),
 
     setCurrentQuiz: (quiz) => 
       dispatch({ type: QuizActionTypes.SET_CURRENT_QUIZ, payload: quiz }),
@@ -348,9 +912,11 @@ export const QuizProvider = ({ children }) => {
     setQuestions: (questions) => 
       dispatch({ type: QuizActionTypes.SET_QUESTIONS, payload: questions }),
 
-    // Gestion du quiz
     startQuiz: (quizData) => 
-      dispatch({ type: QuizActionTypes.START_QUIZ, payload: quizData }),
+      dispatch({ 
+        type: QuizActionTypes.START_QUIZ, 
+        payload: { quizId: quizData.quizId, questions: quizData.questions } 
+      }),
 
     answerQuestion: (answerData) => 
       dispatch({ type: QuizActionTypes.ANSWER_QUESTION, payload: answerData }),
@@ -373,14 +939,9 @@ export const QuizProvider = ({ children }) => {
     resetQuiz: () => 
       dispatch({ type: QuizActionTypes.RESET_QUIZ }),
 
-    // Timer
-    updateTimer: () => 
-      dispatch({ type: QuizActionTypes.UPDATE_TIMER }),
-
     setTimeSpent: (time) => 
       dispatch({ type: QuizActionTypes.SET_TIME_SPENT, payload: time }),
 
-    // Résultats
     setResults: (results) => 
       dispatch({ type: QuizActionTypes.SET_RESULTS, payload: results }),
 
@@ -390,94 +951,138 @@ export const QuizProvider = ({ children }) => {
     updateLeaderboard: (leaderboard) => 
       dispatch({ type: QuizActionTypes.UPDATE_LEADERBOARD, payload: leaderboard }),
 
-    // Filtres
     setFilters: (filters) => 
       dispatch({ type: QuizActionTypes.SET_FILTERS, payload: filters }),
 
     setSearchQuery: (query) => 
       dispatch({ type: QuizActionTypes.SET_SEARCH_QUERY, payload: query }),
 
-    // Erreurs
     setError: (error) => 
       dispatch({ type: QuizActionTypes.SET_ERROR, payload: error }),
 
     clearError: () => 
-      dispatch({ type: QuizActionTypes.CLEAR_ERROR })
+      dispatch({ type: QuizActionTypes.CLEAR_ERROR }),
+
+    goToQuestion: (index) => {
+      if (index >= 0 && index < state.currentQuestions.length) {
+        dispatch({ 
+          type: 'SET_CURRENT_QUESTION', 
+          payload: index 
+        });
+      }
+    }
   };
 
-  // Effets pour filtrer les quizzes
-  useEffect(() => {
-    const filterQuizzes = () => {
-      let filtered = state.quizzes;
-
-      // Filtre par recherche
-      if (state.searchQuery) {
-        const query = state.searchQuery.toLowerCase();
-        filtered = filtered.filter(quiz =>
-          quiz.title.toLowerCase().includes(query) ||
-          quiz.description.toLowerCase().includes(query) ||
-          quiz.tags.some(tag => tag.toLowerCase().includes(query))
-        );
+  // Méthodes utilitaires
+  const loadQuiz = async (quizId) => {
+    try {
+      actions.setLoading(true);
+      
+      const quiz = state.quizzes.find(q => q.id === quizId);
+      if (!quiz) {
+        throw new Error('Quiz non trouvé');
       }
+      
+      actions.setCurrentQuiz(quiz);
+      actions.setQuestions(quiz.questions || []);
+      actions.setError(null);
+      
+      return { success: true, quiz };
+    } catch (error) {
+      actions.setError(error.message);
+      return { success: false, error: error.message };
+    }
+  };
 
-      // Filtres par critères
-      if (state.filters.university) {
-        filtered = filtered.filter(quiz => quiz.universityId === state.filters.university);
-      }
+  const submitQuiz = async () => {
+    try {
+      actions.setLoading(true);
+      
+      actions.completeQuiz();
+      const results = state.currentAttempt;
+      actions.setResults(results);
+      
+      return { success: true, results };
+    } catch (error) {
+      actions.setError(error.message);
+      return { success: false, error: error.message };
+    }
+  };
 
-      if (state.filters.faculty) {
-        filtered = filtered.filter(quiz => quiz.facultyId === state.filters.faculty);
-      }
+  const getFormattedTime = () => {
+    const minutes = Math.floor(state.timeSpent / 60);
+    const seconds = state.timeSpent % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
 
-      if (state.filters.subject) {
-        filtered = filtered.filter(quiz => quiz.subjectId === state.filters.subject);
-      }
+  const getRemainingTime = (totalTime) => {
+    return Math.max(0, (totalTime * 60) - state.timeSpent);
+  };
 
-      if (state.filters.level) {
-        filtered = filtered.filter(quiz => quiz.level === state.filters.level);
-      }
+  const isQuestionAnswered = (questionId) => {
+    return state.userAnswers.some(answer => answer.questionId === questionId);
+  };
 
-      if (state.filters.difficulty) {
-        filtered = filtered.filter(quiz => quiz.difficulty === state.filters.difficulty);
-      }
+  const getUserAnswer = (questionId) => {
+    return state.userAnswers.find(answer => answer.questionId === questionId);
+  };
 
-      if (state.filters.isPro !== null) {
-        filtered = filtered.filter(quiz => quiz.isPro === state.filters.isPro);
-      }
-
-      dispatch({ type: QuizActionTypes.SET_QUIZZES, payload: filtered });
-    };
-
-    filterQuizzes();
-  }, [state.filters, state.searchQuery, state.quizzes]);
-
-  // Timer automatique
-  useEffect(() => {
-    let timer;
+  const getQuizRecommendations = (count = 6) => {
+    const { currentQuiz } = state;
+    if (!currentQuiz) return state.quizzes.slice(0, count);
     
-    if (state.status === QuizState.IN_PROGRESS) {
-      timer = setInterval(() => {
-        actions.updateTimer();
-      }, 1000);
-    }
+    return state.quizzes
+      .filter(quiz => 
+        quiz.subjectId === currentQuiz.subjectId &&
+        quiz.id !== currentQuiz.id
+      )
+      .slice(0, count);
+  };
 
-    return () => {
-      if (timer) clearInterval(timer);
+  const getSubjectStats = (subjectId) => {
+    const subjectAttempts = state.userAttempts.filter(
+      attempt => {
+        const quiz = state.quizzes.find(q => q.id === attempt.quizId);
+        return quiz && quiz.subjectId === subjectId;
+      }
+    );
+    
+    if (subjectAttempts.length === 0) return null;
+    
+    const totalScore = subjectAttempts.reduce((sum, attempt) => sum + attempt.score, 0);
+    const totalTime = subjectAttempts.reduce((sum, attempt) => sum + (attempt.timeSpent || 0), 0);
+    const bestScore = Math.max(...subjectAttempts.map(attempt => attempt.score));
+    
+    return {
+      attempts: subjectAttempts.length,
+      averageScore: totalScore / subjectAttempts.length,
+      totalTime,
+      bestScore,
+      lastAttempt: subjectAttempts[subjectAttempts.length - 1]
     };
-  }, [state.status]);
+  };
 
-  // Calcul des statistiques
-  useEffect(() => {
-    if (state.userAttempts.length > 0) {
-      const totalQuizzesTaken = state.userAttempts.length;
-      const averageScore = state.userAttempts.reduce((sum, attempt) => sum + attempt.score, 0) / totalQuizzesTaken;
-      const totalTimeSpent = state.userAttempts.reduce((sum, attempt) => sum + (attempt.timeSpent || 0), 0);
-      const bestScore = Math.max(...state.userAttempts.map(attempt => attempt.score));
-      const quizzesCompleted = state.userAttempts.filter(attempt => attempt.status === 'completed').length;
-
-      // Mettre à jour les statistiques (dans un vrai app, on aurait une action dédiée)
-    }
-  }, [state.userAttempts]);
+  const getUniversityStats = (universityId) => {
+    const universityQuizzes = state.quizzes.filter(q => q.universityId === universityId);
+    const universityAttempts = state.userAttempts.filter(
+      attempt => {
+        const quiz = state.quizzes.find(q => q.id === attempt.quizId);
+        return quiz && quiz.universityId === universityId;
+      }
+    );
+    
+    return {
+      totalQuizzes: universityQuizzes.length,
+      totalQuestions: universityQuizzes.reduce((sum, quiz) => sum + quiz.questionsCount, 0),
+      yourAttempts: universityAttempts.length,
+      averageScore: universityAttempts.length > 0
+        ? universityAttempts.reduce((sum, attempt) => sum + attempt.score, 0) / universityAttempts.length
+        : 0,
+      completionRate: universityAttempts.length > 0
+        ? (universityAttempts.filter(a => a.status === 'completed').length / universityAttempts.length) * 100
+        : 0
+    };
+  };
 
   // Valeur du contexte
   const contextValue = {
@@ -497,78 +1102,102 @@ export const QuizProvider = ({ children }) => {
     // Actions
     ...actions,
 
-    // Méthodes composites
-    loadQuiz: async (quizId) => {
-      try {
-        actions.setLoading(true);
-        
-        // Simulation de chargement - remplacer par API réelle
-        const quiz = await mockLoadQuizAPI(quizId);
-        const questions = await mockLoadQuestionsAPI(quizId);
-        
-        actions.setCurrentQuiz(quiz);
-        actions.setQuestions(questions);
-        actions.setError(null);
-        
-        return { success: true, quiz, questions };
-      } catch (error) {
-        actions.setError(error.message);
-        return { success: false, error: error.message };
+    // Méthodes utilitaires
+    loadQuiz,
+    submitQuiz,
+    getFormattedTime,
+    getRemainingTime,
+    isQuestionAnswered,
+    getUserAnswer,
+    getQuizRecommendations,
+    getSubjectStats,
+    getUniversityStats,
+
+    // Filtres avancés
+    getQuizzesBySubject: (subjectId) => 
+      state.quizzes.filter(quiz => quiz.subjectId === subjectId),
+    
+    getQuizzesByUniversity: (universityId) => 
+      state.quizzes.filter(quiz => quiz.universityId === universityId),
+    
+    getQuizzesByFaculty: (facultyId) => 
+      state.quizzes.filter(quiz => quiz.facultyId === facultyId),
+    
+    getQuizzesByLevel: (level) => 
+      state.quizzes.filter(quiz => quiz.level === level),
+    
+    getQuizzesByDifficulty: (difficulty) => 
+      state.quizzes.filter(quiz => quiz.difficulty === difficulty),
+
+    // Recherche avancée
+    searchQuizzes: (query, filters = {}) => {
+      const searchQuery = query || state.searchQuery;
+      const combinedFilters = { ...state.filters, ...filters };
+      
+      let results = state.quizzes;
+      
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        results = results.filter(quiz =>
+          quiz.title.toLowerCase().includes(q) ||
+          quiz.description.toLowerCase().includes(q) ||
+          quiz.subject.toLowerCase().includes(q) ||
+          quiz.tags.some(tag => tag.toLowerCase().includes(q)) ||
+          quiz.author.toLowerCase().includes(q)
+        );
       }
+      
+      Object.entries(combinedFilters).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          results = results.filter(quiz => quiz[key] === value);
+        }
+      });
+      
+      return results;
     },
 
-    submitQuiz: async () => {
-      try {
-        actions.setLoading(true);
-        
-        // Préparer les données de tentative
-        const attemptData = {
-          ...state.currentAttempt,
-          completedAt: new Date().toISOString()
-        };
+    // Statistiques avancées
+    getOverallStats: () => ({
+      totalSubjectsCovered: new Set(state.quizzes.map(q => q.subjectId)).size,
+      totalUniversitiesCovered: new Set(state.quizzes.map(q => q.universityId).filter(id => id)).size,
+      totalFacultiesCovered: new Set(state.quizzes.map(q => q.facultyId).filter(id => id)).size,
+      quizzesByDifficulty: state.quizzes.reduce((acc, quiz) => {
+        acc[quiz.difficulty] = (acc[quiz.difficulty] || 0) + 1;
+        return acc;
+      }, {}),
+      quizzesByLevel: state.quizzes.reduce((acc, quiz) => {
+        acc[quiz.level] = (acc[quiz.level] || 0) + 1;
+        return acc;
+      }, {}),
+      averageQuizRating: state.quizzes.reduce((sum, quiz) => sum + quiz.rating, 0) / state.quizzes.length,
+      totalParticipants: state.quizzes.reduce((sum, quiz) => sum + quiz.participants, 0)
+    }),
 
-        // Simulation de sauvegarde - remplacer par API réelle
-        await mockSaveAttemptAPI(attemptData);
-        
-        actions.saveAttempt(attemptData);
-        actions.setResults(attemptData);
-        actions.completeQuiz();
-        
-        return { success: true, results: attemptData };
-      } catch (error) {
-        actions.setError(error.message);
-        return { success: false, error: error.message };
-      }
+    // Gestion des favoris
+    toggleBookmark: (quizId) => {
+      const updatedQuizzes = state.quizzes.map(quiz => 
+        quiz.id === quizId 
+          ? { ...quiz, isBookmarked: !quiz.isBookmarked }
+          : quiz
+      );
+      
+      dispatch({ type: QuizActionTypes.SET_QUIZZES, payload: updatedQuizzes });
     },
 
-    // Méthodes de navigation améliorées
-    goToQuestion: (index) => {
-      if (index >= 0 && index < state.currentQuestions.length) {
-        dispatch({ 
-          type: QuizActionTypes.SET_CURRENT_QUESTION, 
-          payload: index 
-        });
-      }
-    },
-
-    // Méthodes de gestion du temps
-    getFormattedTime: () => {
-      const minutes = Math.floor(state.timeSpent / 60);
-      const seconds = state.timeSpent % 60;
-      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    },
-
-    getRemainingTime: (totalTime) => {
-      return Math.max(0, totalTime - state.timeSpent);
-    },
-
-    // Méthodes de vérification
-    isQuestionAnswered: (questionId) => {
-      return state.userAnswers.some(answer => answer.questionId === questionId);
-    },
-
-    getUserAnswer: (questionId) => {
-      return state.userAnswers.find(answer => answer.questionId === questionId);
+    toggleLike: (quizId) => {
+      const updatedQuizzes = state.quizzes.map(quiz => {
+        if (quiz.id === quizId) {
+          const newLikes = quiz.isLiked ? quiz.likes - 1 : quiz.likes + 1;
+          return { 
+            ...quiz, 
+            isLiked: !quiz.isLiked,
+            likes: newLikes 
+          };
+        }
+        return quiz;
+      });
+      
+      dispatch({ type: QuizActionTypes.SET_QUIZZES, payload: updatedQuizzes });
     }
   };
 
@@ -577,50 +1206,6 @@ export const QuizProvider = ({ children }) => {
       {children}
     </QuizContext.Provider>
   );
-};
-
-// Mock APIs - À remplacer par vos vraies APIs
-const mockLoadQuizAPI = async (quizId) => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Simulation de données de quiz
-  return {
-    id: quizId,
-    title: "Quiz de Démonstration",
-    description: "Ceci est un quiz de démonstration",
-    questionsCount: 5,
-    duration: 30,
-    difficulty: "intermediate"
-  };
-};
-
-const mockLoadQuestionsAPI = async (quizId) => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  
-  return [
-    {
-      id: 1,
-      question: "Quelle est la capitale du Maroc ?",
-      options: ["Casablanca", "Marrakech", "Rabat", "Fès"],
-      correctAnswer: 2,
-      explanation: "Rabat est la capitale administrative du Maroc.",
-      points: 1
-    },
-    {
-      id: 2,
-      question: "Quel langage est utilisé pour le style des pages web ?",
-      options: ["HTML", "CSS", "JavaScript", "Python"],
-      correctAnswer: 1,
-      explanation: "CSS (Cascading Style Sheets) est utilisé pour le style.",
-      points: 1
-    }
-  ];
-};
-
-const mockSaveAttemptAPI = async (attemptData) => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  console.log('Attempt saved:', attemptData);
-  return { success: true };
 };
 
 export default QuizContext;

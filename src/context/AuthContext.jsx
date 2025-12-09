@@ -1,39 +1,25 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import * as api from '../utils/api';
 
-// Lightweight in-file JWT payload decoder to avoid an external dependency during development.
-// If you prefer, install `jwt-decode` and remove this helper: `npm install jwt-decode`.
-const decodeJwt = (token) => {
-  if (!token) return null;
-  try {
-    const base64Url = token.split('.')[1];
-    if (!base64Url) return null;
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(function (c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch (err) {
-    return null;
-  }
+// Constants
+const STORAGE_KEYS = {
+  USER: 'quiz_user_data',
+  TOKEN: 'quiz_token',
+  REFRESH_TOKEN: 'quiz_refresh_token'
 };
 
-// Installation requise : npm install jwt-decode
-
-// États possibles de l'authentification
-const AuthState = {
-  IDLE: 'idle',
-  LOADING: 'loading',
-  AUTHENTICATED: 'authenticated',
-  UNAUTHENTICATED: 'unauthenticated'
+// Initial state
+const initialState = {
+  user: null,
+  token: null,
+  refreshToken: null,
+  status: 'idle',
+  error: null,
+  isLoading: false
 };
 
-// Types d'actions
-const AuthActionTypes = {
+// Action types
+const ActionTypes = {
   SET_LOADING: 'SET_LOADING',
   LOGIN_SUCCESS: 'LOGIN_SUCCESS',
   LOGIN_FAILURE: 'LOGIN_FAILURE',
@@ -44,73 +30,56 @@ const AuthActionTypes = {
   REFRESH_TOKEN: 'REFRESH_TOKEN'
 };
 
-// State initial
-const initialState = {
-  user: null,
-  token: null,
-  refreshToken: null,
-  status: AuthState.IDLE,
-  error: null,
-  isLoading: false
-};
-
 // Reducer
 const authReducer = (state, action) => {
   switch (action.type) {
-    case AuthActionTypes.SET_LOADING:
+    case ActionTypes.SET_LOADING:
       return {
         ...state,
         isLoading: action.payload
       };
 
-    case AuthActionTypes.LOGIN_SUCCESS:
+    case ActionTypes.LOGIN_SUCCESS:
       return {
         ...state,
         user: action.payload.user,
         token: action.payload.token,
         refreshToken: action.payload.refreshToken,
-        status: AuthState.AUTHENTICATED,
+        status: 'authenticated',
         error: null,
         isLoading: false
       };
 
-    case AuthActionTypes.LOGIN_FAILURE:
+    case ActionTypes.LOGIN_FAILURE:
       return {
         ...state,
         user: null,
         token: null,
         refreshToken: null,
-        status: AuthState.UNAUTHENTICATED,
+        status: 'unauthenticated',
         error: action.payload,
         isLoading: false
       };
 
-    case AuthActionTypes.LOGOUT:
+    case ActionTypes.LOGOUT:
       return {
         ...initialState,
-        status: AuthState.UNAUTHENTICATED
+        status: 'unauthenticated'
       };
 
-    case AuthActionTypes.UPDATE_USER:
+    case ActionTypes.UPDATE_USER:
       return {
         ...state,
-        user: { ...state.user, ...action.payload }
+        user: state.user ? { ...state.user, ...action.payload } : null
       };
 
-    case AuthActionTypes.SET_ERROR:
-      return {
-        ...state,
-        error: action.payload,
-        isLoading: false
-      };
+    case ActionTypes.SET_ERROR:
+      return { ...state, error: action.payload };
 
-    case AuthActionTypes.CLEAR_ERROR:
-      return {
-        ...state,
-        error: null
-      };
+    case ActionTypes.CLEAR_ERROR:
+      return { ...state, error: null };
 
-    case AuthActionTypes.REFRESH_TOKEN:
+    case ActionTypes.REFRESH_TOKEN:
       return {
         ...state,
         token: action.payload.token,
@@ -122,406 +91,263 @@ const authReducer = (state, action) => {
   }
 };
 
-// Création du contexte
-const AuthContext = createContext();
+// Utility functions
+const saveToStorage = (user, token, refreshToken) => {
+  try {
+    if (user) localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+    if (token) localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+    if (refreshToken) localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+  } catch (error) {
+    console.error('Error saving to storage:', error);
+  }
+};
 
-// Hook personnalisé pour utiliser le contexte
+const loadFromStorage = () => {
+  try {
+    const user = localStorage.getItem(STORAGE_KEYS.USER);
+    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+    const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+    
+    return {
+      user: user ? JSON.parse(user) : null,
+      token,
+      refreshToken
+    };
+  } catch (error) {
+    console.error('Error loading from storage:', error);
+    return { user: null, token: null, refreshToken: null };
+  }
+};
+
+const clearStorage = () => {
+  try {
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    localStorage.removeItem(STORAGE_KEYS.TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+  } catch (error) {
+    console.error('Error clearing storage:', error);
+  }
+};
+
+// Create context
+const AuthContext = createContext(undefined);
+
+// Hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
 };
 
-// Provider component
+// Provider
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Vérifier si le token est expiré
-  const isTokenExpired = (token) => {
-    if (!token) return true;
-    try {
-      const decoded = decodeJwt(token);
-      return decoded?.exp * 1000 < Date.now();
-    } catch (error) {
-      return true;
-    }
-  };
-
-  // Décoder le token pour obtenir les infos utilisateur
-  const decodeUserFromToken = (token) => {
-    try {
-      const decoded = decodeJwt(token);
-      return {
-        id: decoded.sub || decoded.id,
-        email: decoded.email,
-        firstName: decoded.firstName,
-        lastName: decoded.lastName,
-        role: decoded.role || 'student',
-        university: decoded.university,
-        faculty: decoded.faculty,
-        level: decoded.level,
-        avatar: decoded.avatar,
-        isPro: decoded.isPro || false,
-        subscription: decoded.subscription,
-        exp: decoded.exp
-      };
-    } catch (error) {
-      console.error('Error decoding token:', error);
-      return null;
-    }
-  };
-
-  // Initialiser l'authentification au chargement de l'app
+  // Initialize auth from storage
   useEffect(() => {
     const initializeAuth = async () => {
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+      
       try {
-        dispatch({ type: AuthActionTypes.SET_LOADING, payload: true });
-
-        const token = localStorage.getItem('quiz_token');
-        const refreshToken = localStorage.getItem('quiz_refresh_token');
-
-        if (token && !isTokenExpired(token)) {
-          const user = decodeUserFromToken(token);
-          if (user) {
-            dispatch({
-              type: AuthActionTypes.LOGIN_SUCCESS,
-              payload: { user, token, refreshToken }
-            });
-          } else {
-            await handleLogout();
-          }
-        } else if (refreshToken) {
-          // Tentative de refresh token
-          await refreshAuthToken();
+        const { user, token, refreshToken } = loadFromStorage();
+        
+        if (user && token) {
+          dispatch({
+            type: ActionTypes.LOGIN_SUCCESS,
+            payload: { user, token, refreshToken }
+          });
         } else {
-          dispatch({ type: AuthActionTypes.LOGOUT });
+          dispatch({ type: ActionTypes.SET_LOADING, payload: false });
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
-        await handleLogout();
-      } finally {
-        dispatch({ type: AuthActionTypes.SET_LOADING, payload: false });
+        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
       }
     };
 
     initializeAuth();
   }, []);
 
-  // Fonction de login
-  const login = async (email, password) => {
+  // Login function
+  const login = async (email, password, rememberMe = false) => {
     try {
-      dispatch({ type: AuthActionTypes.SET_LOADING, payload: true });
-      dispatch({ type: AuthActionTypes.CLEAR_ERROR });
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+      dispatch({ type: ActionTypes.CLEAR_ERROR });
 
-      // Simulation d'appel API - Remplacer par votre vrai endpoint
-      const response = await mockLoginAPI(email, password);
-
-      if (response.success) {
-        const { user, token, refreshToken } = response.data;
-
-        // Stocker les tokens
-        localStorage.setItem('quiz_token', token);
-        localStorage.setItem('quiz_refresh_token', refreshToken);
-
+      const result = await api.login(email, password);
+      
+      if (result.success) {
+        const { user, token, refreshToken } = result.data;
+        
         dispatch({
-          type: AuthActionTypes.LOGIN_SUCCESS,
+          type: ActionTypes.LOGIN_SUCCESS,
           payload: { user, token, refreshToken }
         });
 
+        if (rememberMe) {
+          saveToStorage(user, token, refreshToken);
+        }
+
         return { success: true };
       } else {
-        throw new Error(response.message);
+        dispatch({
+          type: ActionTypes.LOGIN_FAILURE,
+          payload: result.error?.message || 'Login failed'
+        });
+        return { success: false, error: result.error?.message || 'Login failed' };
       }
     } catch (error) {
-      const errorMessage = error.message || 'Erreur de connexion';
+      const errorMessage = error?.response?.data?.message || error.message || 'An error occurred';
       dispatch({
-        type: AuthActionTypes.LOGIN_FAILURE,
+        type: ActionTypes.LOGIN_FAILURE,
         payload: errorMessage
       });
       return { success: false, error: errorMessage };
     }
   };
 
-  // Fonction d'inscription
+  // Register function
   const register = async (userData) => {
     try {
-      dispatch({ type: AuthActionTypes.SET_LOADING, payload: true });
-      dispatch({ type: AuthActionTypes.CLEAR_ERROR });
+      dispatch({ type: ActionTypes.SET_LOADING, payload: true });
+      dispatch({ type: ActionTypes.CLEAR_ERROR });
 
-      // Simulation d'appel API
-      const response = await mockRegisterAPI(userData);
+      const result = await api.register(userData);
+      
+      if (result.success) {
+        const { user, token, refreshToken } = result.data;
+        
+        dispatch({
+          type: ActionTypes.LOGIN_SUCCESS,
+          payload: { user, token, refreshToken }
+        });
 
-      if (response.success) {
-        // Auto-login après inscription
-        return await login(userData.email, userData.password);
+        saveToStorage(user, token, refreshToken);
+
+        return { success: true };
       } else {
-        throw new Error(response.message);
+        dispatch({ type: ActionTypes.SET_LOADING, payload: false });
+        return { success: false, error: result.error?.message || 'Registration failed' };
       }
     } catch (error) {
-      const errorMessage = error.message || "Erreur d'inscription";
-      dispatch({
-        type: AuthActionTypes.SET_ERROR,
-        payload: errorMessage
-      });
+      const errorMessage = error?.response?.data?.message || error.message || 'An error occurred';
+      dispatch({ type: ActionTypes.SET_LOADING, payload: false });
       return { success: false, error: errorMessage };
     }
   };
 
-  // Fonction de logout
-  const handleLogout = async () => {
+  // Logout function
+  const logout = async () => {
     try {
-      // Appel API de logout si nécessaire
-      await mockLogoutAPI();
+      await api.logout();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Nettoyer le localStorage
-      localStorage.removeItem('quiz_token');
-      localStorage.removeItem('quiz_refresh_token');
-      
-      dispatch({ type: AuthActionTypes.LOGOUT });
+      clearStorage();
+      dispatch({ type: ActionTypes.LOGOUT });
     }
   };
 
-  // Refresh token
-  const refreshAuthToken = async () => {
+  // Refresh token function
+  const refreshToken = async () => {
     try {
-      const refreshToken = localStorage.getItem('quiz_refresh_token');
+      const result = await api.refreshAuthToken();
       
-      if (!refreshToken) {
-        throw new Error('No refresh token available');
-      }
-
-      const response = await mockRefreshTokenAPI(refreshToken);
-
-      if (response.success) {
-        const { token, refreshToken: newRefreshToken } = response.data;
-
-        localStorage.setItem('quiz_token', token);
-        localStorage.setItem('quiz_refresh_token', newRefreshToken);
-
+      if (result.success) {
         dispatch({
-          type: AuthActionTypes.REFRESH_TOKEN,
-          payload: { token, refreshToken: newRefreshToken }
+          type: ActionTypes.REFRESH_TOKEN,
+          payload: { token: result.token, refreshToken: result.refreshToken }
         });
-
+        
+        saveToStorage(state.user, result.token, result.refreshToken);
         return true;
-      } else {
-        throw new Error('Token refresh failed');
       }
+      
+      return false;
     } catch (error) {
       console.error('Token refresh error:', error);
-      await handleLogout();
       return false;
     }
   };
 
-  // Mettre à jour le profil utilisateur
+  // Update user profile
   const updateProfile = async (profileData) => {
     try {
-      dispatch({ type: AuthActionTypes.SET_LOADING, payload: true });
-
-      const response = await mockUpdateProfileAPI(state.token, profileData);
-
-      if (response.success) {
-        dispatch({
-          type: AuthActionTypes.UPDATE_USER,
-          payload: response.data.user
-        });
-        return { success: true };
-      } else {
-        throw new Error(response.message);
-      }
-    } catch (error) {
-      const errorMessage = error.message || 'Erreur de mise à jour';
+      // TODO: Implement API call
       dispatch({
-        type: AuthActionTypes.SET_ERROR,
-        payload: errorMessage
+        type: ActionTypes.UPDATE_USER,
+        payload: profileData
       });
-      return { success: false, error: errorMessage };
-    } finally {
-      dispatch({ type: AuthActionTypes.SET_LOADING, payload: false });
-    }
-  };
-
-  // Changer le mot de passe
-  const changePassword = async (currentPassword, newPassword) => {
-    try {
-      dispatch({ type: AuthActionTypes.SET_LOADING, payload: true });
-
-      const response = await mockChangePasswordAPI(
-        state.token, 
-        currentPassword, 
-        newPassword
-      );
-
-      if (response.success) {
-        return { success: true };
-      } else {
-        throw new Error(response.message);
-      }
+      
+      const updatedUser = { ...state.user, ...profileData };
+      saveToStorage(updatedUser, state.token, state.refreshToken);
+      
+      return { success: true };
     } catch (error) {
-      const errorMessage = error.message || 'Erreur de changement de mot de passe';
-      return { success: false, error: errorMessage };
-    } finally {
-      dispatch({ type: AuthActionTypes.SET_LOADING, payload: false });
+      return { success: false, error: error.message };
     }
   };
 
-  // Vérifier les permissions
+  // Helper functions
   const hasRole = (role) => {
     return state.user?.role === role;
   };
 
   const hasPermission = (permission) => {
-    const userPermissions = state.user?.permissions || [];
-    return userPermissions.includes(permission);
+    return state.user?.permissions?.includes(permission) || false;
   };
 
-  // Vérifier si l'utilisateur est pro
   const isProUser = () => {
-    return state.user?.isPro === true;
+    return state.user?.isPro || false;
   };
 
-  // Effacer les erreurs
   const clearError = () => {
-    dispatch({ type: AuthActionTypes.CLEAR_ERROR });
+    dispatch({ type: ActionTypes.CLEAR_ERROR });
   };
 
-  // Intercepteur pour les requêtes API (à utiliser avec axios)
-  const authInterceptor = (config) => {
+  const getAuthHeaders = () => {
     if (state.token) {
-      config.headers.Authorization = `Bearer ${state.token}`;
+      return {
+        'Authorization': `Bearer ${state.token}`,
+        'Content-Type': 'application/json'
+      };
     }
-    return config;
+    return {
+      'Content-Type': 'application/json'
+    };
   };
 
-  // Valeur du contexte
-  const contextValue = {
+  const value = {
     // State
-    ...state,
+    user: state.user,
+    token: state.token,
+    isAuthenticated: state.status === 'authenticated',
+    isLoading: state.isLoading,
+    error: state.error,
+    status: state.status,
     
-    // Méthodes d'authentification
+    // Actions
     login,
     register,
-    logout: handleLogout,
-    refreshToken: refreshAuthToken,
-    
-    // Méthodes de profil
+    logout,
+    refreshToken,
     updateProfile,
-    changePassword,
+    clearError,
     
-    // Méthodes de vérification
+    // Helpers
     hasRole,
     hasPermission,
     isProUser,
-    isAuthenticated: state.status === AuthState.AUTHENTICATED,
-    
-    // Utilitaires
-    clearError,
-    authInterceptor
+    getAuthHeaders
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
-};
-
-// Mock APIs - À remplacer par vos vraies APIs
-const mockLoginAPI = async (email, password) => {
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Simuler latence réseau
-
-  // Simulation de validation
-  if (email === 'admin@quiz.ma' && password === 'password') {
-    const user = {
-      id: 1,
-      email: 'admin@quiz.ma',
-      firstName: 'Admin',
-      lastName: 'User',
-      role: 'admin',
-      university: 'Université Hassan II',
-      faculty: 'Faculté des Sciences',
-      level: 'S6',
-      avatar: null,
-      isPro: true,
-      subscription: 'premium',
-      permissions: ['create_quiz', 'manage_users', 'view_analytics']
-    };
-
-    const token = 'mock_jwt_token_here';
-    const refreshToken = 'mock_refresh_token_here';
-
-    return { success: true, data: { user, token, refreshToken } };
-  }
-
-  if (email === 'etudiant@quiz.ma' && password === 'password') {
-    const user = {
-      id: 2,
-      email: 'etudiant@quiz.ma',
-      firstName: 'Étudiant',
-      lastName: 'Marocain',
-      role: 'student',
-      university: 'Université Mohammed V',
-      faculty: 'FST',
-      level: 'S3',
-      avatar: null,
-      isPro: false,
-      subscription: 'free',
-      permissions: ['take_quiz', 'view_profile']
-    };
-
-    const token = 'mock_jwt_token_student';
-    const refreshToken = 'mock_refresh_token_student';
-
-    return { success: true, data: { user, token, refreshToken } };
-  }
-
-  return { success: false, message: 'Email ou mot de passe incorrect' };
-};
-
-const mockRegisterAPI = async (userData) => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Simulation d'inscription réussie
-  return { success: true, message: 'Inscription réussie' };
-};
-
-const mockLogoutAPI = async () => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return { success: true };
-};
-
-const mockRefreshTokenAPI = async (refreshToken) => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Simulation de refresh token réussi
-  const newToken = 'new_mock_jwt_token';
-  const newRefreshToken = 'new_mock_refresh_token';
-  
-  return { success: true, data: { token: newToken, refreshToken: newRefreshToken } };
-};
-
-const mockUpdateProfileAPI = async (token, profileData) => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  // Simulation de mise à jour réussie
-  const updatedUser = {
-    ...profileData,
-    updatedAt: new Date().toISOString()
-  };
-  
-  return { success: true, data: { user: updatedUser } };
-};
-
-const mockChangePasswordAPI = async (token, currentPassword, newPassword) => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  // Simulation de changement réussi
-  return { success: true, message: 'Mot de passe changé avec succès' };
 };
 
 export default AuthContext;

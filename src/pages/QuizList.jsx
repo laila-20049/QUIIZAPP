@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuiz } from '../context/QuizContext';
 import QuizCard from '../components/QuizCard';
 import { 
@@ -27,6 +28,7 @@ import {
 } from 'lucide-react';
 
 const QuizList = () => {
+  const navigate = useNavigate();
   const { 
     filteredQuizzes, 
     setFilters, 
@@ -41,7 +43,7 @@ const QuizList = () => {
     subject: null,
     level: null,
     difficulty: null,
-    isPro: null,
+    isPaid: null,
     sortBy: 'popularity'
   });
 
@@ -50,6 +52,41 @@ const QuizList = () => {
   const [showFilters, setShowFilters] = useState(true);
   const [activeSort, setActiveSort] = useState('popularity');
   const [loading, setLoading] = useState(false);
+
+  // Handlers pour les actions des cartes de quiz
+  const handleStartQuiz = (quizId) => {
+    // Trouver le quiz pour vérifier s'il est payant
+    const quiz = filteredQuizzes.find(q => q.id === quizId);
+    
+    if (quiz && quiz.isPaid) {
+      // Rediriger vers la page de paiement avec les détails du quiz
+      navigate('/payment', { state: { quiz } });
+    } else {
+      // Rediriger vers le quiz directement
+      navigate(`/quiz/${quizId}`);
+    }
+  };
+
+  const handleBookmark = (quizId, isBookmarked) => {
+    console.log(`Quiz ${quizId} ${isBookmarked ? 'ajouté aux' : 'retiré des'} favoris`);
+  };
+
+  const handleLike = (quizId, isLiked) => {
+    console.log(`Quiz ${quizId} ${isLiked ? 'aimé' : 'pas aimé'}`);
+  };
+
+  const handleShare = (quizId) => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Moroccan University Quiz',
+        text: 'Découvrez ce quiz !',
+        url: `${window.location.origin}/quiz/${quizId}`
+      }).catch(err => console.log('Erreur:', err));
+    } else {
+      navigator.clipboard.writeText(`${window.location.origin}/quiz/${quizId}`);
+      alert('Lien copié !');
+    }
+  };
 
   // Données pour les filtres
   const universities = [
@@ -119,7 +156,7 @@ const QuizList = () => {
       subject: null,
       level: null,
       difficulty: null,
-      isPro: null,
+      isPaid: null,
       sortBy: 'popularity'
     };
     setSelectedFilters(clearedFilters);
@@ -317,8 +354,8 @@ const QuizList = () => {
                   {selectedFilters.difficulty && 
                     renderFilterPill('Difficulté', selectedFilters.difficulty, 'difficulty')}
                   
-                  {selectedFilters.isPro !== null && 
-                    renderFilterPill('Type', selectedFilters.isPro ? 'Premium' : 'Gratuit', 'isPro')}
+                  {selectedFilters.isPaid !== null && 
+                    renderFilterPill('Type', selectedFilters.isPaid ? 'Payant' : 'Gratuit', 'isPaid')}
                 </div>
               </div>
             )}
@@ -407,9 +444,9 @@ const QuizList = () => {
                     </label>
                     <div className="space-y-2">
                       <button
-                        onClick={() => handleFilterChange('isPro', false)}
+                        onClick={() => handleFilterChange('isPaid', false)}
                         className={`w-full p-2 text-left rounded-lg transition-colors ${
-                          selectedFilters.isPro === false
+                          selectedFilters.isPaid === false
                             ? 'bg-green-50 text-green-700 border border-green-200'
                             : 'hover:bg-gray-50 text-gray-700'
                         }`}
@@ -420,16 +457,16 @@ const QuizList = () => {
                         </div>
                       </button>
                       <button
-                        onClick={() => handleFilterChange('isPro', true)}
+                        onClick={() => handleFilterChange('isPaid', true)}
                         className={`w-full p-2 text-left rounded-lg transition-colors ${
-                          selectedFilters.isPro === true
+                          selectedFilters.isPaid === true
                             ? 'bg-yellow-50 text-yellow-700 border border-yellow-200'
                             : 'hover:bg-gray-50 text-gray-700'
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <Shield className="h-4 w-4" />
-                          <span>Premium</span>
+                          <span>Payant (99 MAD)</span>
                         </div>
                       </button>
                     </div>
@@ -499,7 +536,14 @@ const QuizList = () => {
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredQuizzes.map(quiz => (
-              <QuizCard key={quiz.id} quiz={quiz} />
+              <QuizCard 
+                key={quiz.id} 
+                quiz={quiz}
+                onStartQuiz={handleStartQuiz}
+                onBookmark={handleBookmark}
+                onLike={handleLike}
+                onShare={handleShare}
+              />
             ))}
           </div>
         ) : (

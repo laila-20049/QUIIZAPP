@@ -1,67 +1,108 @@
-import React, { Component } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { AlertTriangle, RefreshCw, Home, ExternalLink, Copy } from 'lucide-react';
 
-class ErrorBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+const ErrorBoundary = ({ 
+  children, 
+  title = "Oups ! Quelque chose s'est mal passé",
+  message = "Une erreur est survenue. Veuillez réessayer ou contacter le support si le problème persiste.",
+  retryText = "Réessayer",
+  homeText = "Retour à l'accueil",
+  showHomeButton = true,
+  onRetry,
+  onError,
+  className = "",
+  fallback: FallbackComponent
+}) => {
+  const [hasError, setHasError] = useState(false);
+  const [error, setError] = useState(null);
+  const [errorInfo, setErrorInfo] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
+  useEffect(() => {
+    const handleError = (errorEvent) => {
+      setHasError(true);
+      setError(errorEvent.error);
+      
+      if (onError) {
+        onError(errorEvent.error);
+      }
+    };
 
-  componentDidCatch(error, errorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
-  }
+    window.addEventListener('error', handleError);
+    
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
+  }, [onError]);
 
-  handleRetry = () => {
-    this.setState({ hasError: false, error: null });
-    window.location.reload();
+  const handleRetry = () => {
+    setHasError(false);
+    setError(null);
+    setErrorInfo(null);
+    
+    if (onRetry) {
+      onRetry();
+    } else {
+      window.location.reload();
+    }
   };
 
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-[400px] flex flex-col items-center justify-center p-6">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-            <AlertTriangle className="h-8 w-8 text-red-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Oups ! Quelque chose s'est mal passé
-          </h2>
-          <p className="text-gray-600 text-center mb-6 max-w-md">
-            Une erreur est survenue. Veuillez réessayer ou contacter le support si le problème persiste.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={this.handleRetry}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Réessayer
-            </button>
-            <button
-              onClick={() => window.location.href = '/'}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Retour à l'accueil
-            </button>
-          </div>
-          {process.env.NODE_ENV === 'development' && (
-            <div className="mt-6 p-4 bg-gray-100 rounded-lg max-w-xl">
-              <p className="text-sm font-medium text-gray-900 mb-2">Détails de l'erreur :</p>
-              <pre className="text-xs text-red-600 overflow-auto">
-                {this.state.error?.toString()}
-              </pre>
-            </div>
-          )}
-        </div>
-      );
+  const copyErrorDetails = async () => {
+    const errorText = `${error?.toString()}\n\n${errorInfo?.componentStack}`;
+    try {
+      await navigator.clipboard.writeText(errorText);
+      alert('Détails copiés dans le presse-papier');
+    } catch {
+      alert('Impossible de copier les détails');
     }
+  };
 
-    return this.props.children;
+  // Si un composant de fallback personnalisé est fourni
+  if (hasError && FallbackComponent) {
+    return <FallbackComponent error={error} resetError={() => setHasError(false)} />;
   }
-}
+
+  if (hasError) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 ${className}`}>
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+          {/* Contenu similaire à la version class */}
+          <div className="text-center">
+            <div className="relative inline-block mb-6">
+              <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center animate-pulse">
+                <AlertTriangle className="h-10 w-10 text-red-600" />
+              </div>
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">{title}</h2>
+            <p className="text-gray-600 mb-8">{message}</p>
+            
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleRetry}
+                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center justify-center gap-2"
+              >
+                <RefreshCw className="h-5 w-5" />
+                {retryText}
+              </button>
+              
+              {showHomeButton && (
+                <button
+                  onClick={() => (window.location.href = '/')}
+                  className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center justify-center gap-2"
+                >
+                  <Home className="h-5 w-5" />
+                  {homeText}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return children;
+};
 
 export default ErrorBoundary;

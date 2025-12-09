@@ -16,6 +16,7 @@ const Profile = lazy(() => import('../pages/Profile'));
 const Leaderboard = lazy(() => import('../pages/Leaderboard'));
 const Result = lazy(() => import('../pages/Result'));
 const ResultsHistory = lazy(() => import('../pages/ResultsHistory'));
+const Payment = lazy(() => import('../pages/Payment'));
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
 const QuizCreate = lazy(() => import('../pages/admin/QuizCreate'));
 const QuizEdit = lazy(() => import('../pages/admin/QuizEdit'));
@@ -122,6 +123,13 @@ const AppRouter = () => {
           <MainLayout>
             <Leaderboard />
           </MainLayout>
+        } />
+        
+        {/* Route de paiement */}
+        <Route path="/payment" element={
+          <AuthLayout>
+            <Payment />
+          </AuthLayout>
         } />
         
         {/* Routes d'authentification (layout minimal) */}
