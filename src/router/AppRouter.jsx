@@ -12,11 +12,16 @@ const QuizDetail = lazy(() => import('../pages/QuizDetail'));
 const QuizPlay = lazy(() => import('../pages/QuizPlay'));
 const Login = lazy(() => import('../pages/Login'));
 const Register = lazy(() => import('../pages/Register'));
+const ForgotPassword = lazy(() => import('../pages/ForgotPassword'));
 const Profile = lazy(() => import('../pages/Profile'));
+const UserDashboard = lazy(() => import('../pages/UserDashboard'));
 const Leaderboard = lazy(() => import('../pages/Leaderboard'));
 const Result = lazy(() => import('../pages/Result'));
 const ResultsHistory = lazy(() => import('../pages/ResultsHistory'));
 const Payment = lazy(() => import('../pages/Payment'));
+const Premium = lazy(() => import('../pages/Premium'));
+const Universities = lazy(() => import('../pages/Universities'));
+const UniversityDetail = lazy(() => import('../pages/UniversityDetail'));
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
 const QuizCreate = lazy(() => import('../pages/admin/QuizCreate'));
 const QuizEdit = lazy(() => import('../pages/admin/QuizEdit'));
@@ -124,12 +129,42 @@ const AppRouter = () => {
             <Leaderboard />
           </MainLayout>
         } />
+
+        <Route path="/universities" element={
+          <MainLayout>
+            <Universities />
+          </MainLayout>
+        } />
+
+        <Route path="/university/:id" element={
+          <MainLayout>
+            <UniversityDetail />
+          </MainLayout>
+        } />
+
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <UserDashboard />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
         
         {/* Route de paiement */}
         <Route path="/payment" element={
-          <AuthLayout>
-            <Payment />
-          </AuthLayout>
+          <ProtectedRoute>
+            <AuthLayout>
+              <Payment />
+            </AuthLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/premium" element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <Premium />
+            </AuthLayout>
+          </ProtectedRoute>
         } />
         
         {/* Routes d'authentification (layout minimal) */}
@@ -145,6 +180,14 @@ const AppRouter = () => {
           <PublicOnlyRoute>
             <AuthLayout>
               <Register />
+            </AuthLayout>
+          </PublicOnlyRoute>
+        } />
+        
+        <Route path="/forgot-password" element={
+          <PublicOnlyRoute>
+            <AuthLayout>
+              <ForgotPassword />
             </AuthLayout>
           </PublicOnlyRoute>
         } />

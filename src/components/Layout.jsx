@@ -45,10 +45,21 @@ const Layout = ({ children, showAdminSidebar = false }) => {
     }
   }, [darkMode]);
 
-  const navigation = [
+  const baseNavigation = [
     { name: 'Accueil', href: '/', icon: Home, badge: null },
     { name: 'Quiz', href: '/quizzes', icon: BookOpen, badge: '12' },
     { name: 'Classement', href: '/leaderboard', icon: Trophy, badge: null },
+    { name: 'Universités', href: '/universities', icon: GraduationCap, badge: null },
+  ];
+
+  const navigation = [
+    ...baseNavigation,
+    ...(isAuthenticated ? [
+      { name: 'Mon Espace', href: '/dashboard', icon: User, badge: null }
+    ] : []),
+    ...(user?.role === 'admin' ? [
+      { name: 'Admin', href: '/admin', icon: Settings, badge: null }
+    ] : [])
   ];
 
   const userNavigation = [

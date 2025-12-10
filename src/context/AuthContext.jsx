@@ -8,6 +8,38 @@ const STORAGE_KEYS = {
   REFRESH_TOKEN: 'quiz_refresh_token'
 };
 
+// Comptes de démonstration pour accès rapide (sans backend)
+const DEMO_USERS = {
+  'admin@quiz.ma': {
+    password: 'password123',
+    role: 'admin',
+    name: 'Administrateur',
+    university: 'Plateforme'
+  },
+  'etudiant@um5.ac.ma': {
+    password: 'student2024',
+    role: 'student',
+    name: 'Étudiant Demo',
+    university: 'UM5 Rabat'
+  },
+  'professeur@uh2c.ac.ma': {
+    password: 'prof2024',
+    role: 'professor',
+    name: 'Professeur Demo',
+    university: 'UH2C'
+  },
+  'admin@demo.com': {
+    password: 'admin123',
+    role: 'admin',
+    name: 'Admin Demo'
+  },
+  'user@demo.com': {
+    password: 'user123',
+    role: 'user',
+    name: 'User Demo'
+  }
+};
+
 // Initial state
 const initialState = {
   user: null,
@@ -176,6 +208,28 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: ActionTypes.SET_LOADING, payload: true });
       dispatch({ type: ActionTypes.CLEAR_ERROR });
 
+      // Try demo accounts first (without backend)
+      const demoUser = DEMO_USERS[email];
+      if (demoUser && demoUser.password === password) {
+        const demoProfile = {
+          email,
+          name: demoUser.name,
+          role: demoUser.role
+        };
+        
+        dispatch({
+          type: ActionTypes.LOGIN_SUCCESS,
+          payload: { user: demoProfile, token: 'demo-token', refreshToken: null }
+        });
+        
+        if (rememberMe) {
+          saveToStorage(demoProfile, 'demo-token', null);
+        }
+        
+        return { success: true };
+      }
+
+      // Otherwise, fallback to real API
       const result = await api.login(email, password);
       
       if (result.success) {

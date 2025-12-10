@@ -446,8 +446,8 @@ const generateQuizzes = () => {
   
   // Parcourir toutes les matières
   SUBJECTS.forEach(subject => {
-    // Créer 2-3 quizzes par matière avec différents niveaux de difficulté
-    for (let i = 0; i < Math.floor(Math.random() * 2) + 2; i++) {
+    // Créer 3-4 quizzes par matière avec différents niveaux de difficulté
+    for (let i = 0; i < Math.floor(Math.random() * 3) + 3; i++) {
       const facultyId = subject.facultyIds.length > 0 
         ? subject.facultyIds[Math.floor(Math.random() * subject.facultyIds.length)]
         : null;
@@ -538,6 +538,352 @@ const generateQuizzes = () => {
       questions: generateQuestionsForSubject(64 + (i % 5), 20)
     });
   }
+  
+  // Ajouter des quizzes spécifiques pour Université Chouaib Doukkali (ENSA El Jadida)
+  const ensaElJadidaSubjects = [
+    { name: 'Aquaculture Durable', subject: 'Aquaculture', difficulty: 'medium' },
+    { name: 'Sciences Marines Appliquées', subject: 'Biologie Marine', difficulty: 'hard' },
+    { name: 'Écologie Côtière', subject: 'Écologie', difficulty: 'medium' },
+    { name: 'Gestion des Ressources Halieutiques', subject: 'Biologie Marine', difficulty: 'hard' },
+    { name: 'Biotechnologie Marine', subject: 'Biotechnologie', difficulty: 'hard' },
+    { name: 'Protection de l\'Environnement Marin', subject: 'Environnement', difficulty: 'medium' },
+    { name: 'Systèmes d\'Aquaculture Intégrée', subject: 'Aquaculture', difficulty: 'medium' },
+    { name: 'Chimie de l\'Eau de Mer', subject: 'Chimie', difficulty: 'hard' },
+    { name: 'Biologie Cellulaire Marine', subject: 'Biologie Marine', difficulty: 'medium' },
+    { name: 'Technologie de Transformation des Produits Marins', subject: 'Technologie', difficulty: 'medium' },
+    { name: 'Microbiologie Marine', subject: 'Microbiologie', difficulty: 'hard' },
+    { name: 'Sécurité Alimentaire et Qualité', subject: 'Qualité', difficulty: 'medium' }
+  ];
+  
+  ensaElJadidaSubjects.forEach((item, idx) => {
+    const questionsCount = Math.floor(Math.random() * 10) + 15;
+    const duration = Math.floor(questionsCount * 1.5);
+    const isPaid = Math.random() > 0.5;
+    
+    quizzes.push({
+      id: quizId++,
+      title: item.name,
+      description: `Quiz spécialisé en ${item.subject} pour les étudiants de l'ENSA El Jadida. Préparation aux examens et concours.`,
+      subject: item.subject,
+      subjectId: 100 + idx,
+      university: 'Université Chouaib Doukkali',
+      universityId: 8,
+      faculty: 'ENSA El Jadida',
+      facultyId: 16,
+      level: 'S5-S6',
+      questionsCount,
+      duration,
+      participants: Math.floor(Math.random() * 3000) + 200,
+      difficulty: item.difficulty,
+      rating: (Math.random() * 1.2 + 3.8).toFixed(1),
+      isPro: false,
+      isPaid: isPaid,
+      price: isPaid ? 99 : 0,
+      isCompleted: Math.random() > 0.4,
+      bestScore: Math.random() > 0.3 ? Math.floor(Math.random() * 30) + 70 : null,
+      currentScore: Math.random() > 0.3 ? Math.floor(Math.random() * 30) + 65 : null,
+      completionRate: Math.floor(Math.random() * 25) + 75,
+      averageScore: Math.floor(Math.random() * 25) + 65,
+      tags: [item.subject.toLowerCase(), 'marine', 'aquaculture', 'ensa', 'el-jadida', isPaid ? 'premium' : 'gratuit'],
+      createdAt: new Date(Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
+      author: ['Prof. Karim Benlyoussef', 'Dr. Nadia Lebkiri', 'Prof. Mohammed Elhadj'][Math.floor(Math.random() * 3)],
+      popularity: 'trending',
+      streakRequired: null,
+      timeRecord: null,
+      isBookmarked: Math.random() > 0.6,
+      isLiked: Math.random() > 0.5,
+      likes: Math.floor(Math.random() * 150) + 50,
+      shares: Math.floor(Math.random() * 80) + 20,
+      questions: generateQuestionsForSubject(100 + idx, questionsCount)
+    });
+  });
+  
+  // Ajouter des quizzes spécifiques pour Université Marrakech Cadi Ayyad
+  const umcaSubjects = [
+    { name: 'Droit International et Droits de l\'Homme', subject: 'Droit International', difficulty: 'hard' },
+    { name: 'Droit Constitutionnel Marocain', subject: 'Droit Constitutionnel', difficulty: 'medium' },
+    { name: 'Droit Civil et Obligations', subject: 'Droit Civil', difficulty: 'hard' },
+    { name: 'Droit Pénal et Procédure Pénale', subject: 'Droit Pénal', difficulty: 'hard' },
+    { name: 'Droit Administratif Marocain', subject: 'Droit Administratif', difficulty: 'medium' },
+    { name: 'Droit Commercial et Droit des Affaires', subject: 'Droit Commercial', difficulty: 'medium' },
+    { name: 'Théorie Générale du Droit', subject: 'Philosophie du Droit', difficulty: 'hard' },
+    { name: 'Histoire Contemporaine du Maroc', subject: 'Histoire', difficulty: 'medium' },
+    { name: 'Linguistique et Analyses de Texte', subject: 'Linguistique', difficulty: 'medium' },
+    { name: 'Littérature Arabe Classique', subject: 'Littérature', difficulty: 'hard' },
+    { name: 'Sociologie des Organisations', subject: 'Sociologie', difficulty: 'medium' },
+    { name: 'Philosophie et Pensée Critique', subject: 'Philosophie', difficulty: 'hard' }
+  ];
+  
+  umcaSubjects.forEach((item, idx) => {
+    const questionsCount = Math.floor(Math.random() * 10) + 15;
+    const duration = Math.floor(questionsCount * 1.5);
+    const isPaid = Math.random() > 0.45;
+    
+    quizzes.push({
+      id: quizId++,
+      title: item.name,
+      description: `Quiz spécialisé en ${item.subject} pour les étudiants de l'Université Marrakech Cadi Ayyad. Préparation aux examens.`,
+      subject: item.subject,
+      subjectId: 200 + idx,
+      university: 'Université Marrakech Cadi Ayyad',
+      universityId: 12,
+      faculty: 'Faculté de Droit',
+      facultyId: null,
+      level: 'S5-S6',
+      questionsCount,
+      duration,
+      participants: Math.floor(Math.random() * 2500) + 150,
+      difficulty: item.difficulty,
+      rating: (Math.random() * 1.2 + 3.7).toFixed(1),
+      isPro: false,
+      isPaid: isPaid,
+      price: isPaid ? 99 : 0,
+      isCompleted: Math.random() > 0.35,
+      bestScore: Math.random() > 0.3 ? Math.floor(Math.random() * 30) + 70 : null,
+      currentScore: Math.random() > 0.3 ? Math.floor(Math.random() * 30) + 65 : null,
+      completionRate: Math.floor(Math.random() * 25) + 75,
+      averageScore: Math.floor(Math.random() * 25) + 65,
+      tags: [item.subject.toLowerCase(), 'droit', 'humain', 'marrakech', isPaid ? 'premium' : 'gratuit'],
+      createdAt: new Date(Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
+      author: ['Prof. Hassan Al-Andalusi', 'Dr. Fatima Lahlou', 'Prof. Ahmed Rissani'][Math.floor(Math.random() * 3)],
+      popularity: 'popular',
+      streakRequired: null,
+      timeRecord: null,
+      isBookmarked: Math.random() > 0.65,
+      isLiked: Math.random() > 0.55,
+      likes: Math.floor(Math.random() * 120) + 30,
+      shares: Math.floor(Math.random() * 70) + 15,
+      questions: generateQuestionsForSubject(200 + idx, questionsCount)
+    });
+  });
+  
+  // Ajouter des quizzes pour Université Al Akhawayn (Ifrane) - Université d'élite
+  const auiSubjects = [
+    { name: 'Advanced Data Structures', subject: 'Computer Science', difficulty: 'hard' },
+    { name: 'Machine Learning Fundamentals', subject: 'Artificial Intelligence', difficulty: 'hard' },
+    { name: 'Systems Architecture', subject: 'Computer Science', difficulty: 'hard' },
+    { name: 'Network Security & Cryptography', subject: 'Cybersecurity', difficulty: 'hard' },
+    { name: 'Business Strategy & Management', subject: 'Management', difficulty: 'medium' },
+    { name: 'Financial Analysis & Accounting', subject: 'Finance', difficulty: 'medium' },
+    { name: 'Corporate Governance', subject: 'Business Law', difficulty: 'medium' },
+    { name: 'International Business Economics', subject: 'Economics', difficulty: 'hard' },
+    { name: 'Entrepreneurship & Innovation', subject: 'Entrepreneurship', difficulty: 'medium' },
+    { name: 'Leadership & Organizational Behavior', subject: 'Management', difficulty: 'medium' }
+  ];
+  
+  auiSubjects.forEach((item, idx) => {
+    const questionsCount = Math.floor(Math.random() * 10) + 18;
+    const duration = Math.floor(questionsCount * 1.5);
+    const isPaid = Math.random() > 0.35;
+    
+    quizzes.push({
+      id: quizId++,
+      title: item.name,
+      description: `Elite quiz for Al Akhawayn University students. Advanced curriculum in ${item.subject}.`,
+      subject: item.subject,
+      subjectId: 300 + idx,
+      university: 'Université Al Akhawayn',
+      universityId: 11,
+      faculty: item.subject.includes('Computer') || item.subject.includes('Cyber') ? 'School of Science and Engineering' : 'School of Business and Economics',
+      facultyId: null,
+      level: 'Advanced',
+      questionsCount,
+      duration,
+      participants: Math.floor(Math.random() * 1500) + 300,
+      difficulty: item.difficulty,
+      rating: (Math.random() * 0.9 + 4.0).toFixed(1),
+      isPro: false,
+      isPaid: isPaid,
+      price: isPaid ? 99 : 0,
+      isCompleted: Math.random() > 0.3,
+      bestScore: Math.random() > 0.25 ? Math.floor(Math.random() * 30) + 75 : null,
+      currentScore: Math.random() > 0.25 ? Math.floor(Math.random() * 25) + 70 : null,
+      completionRate: Math.floor(Math.random() * 20) + 80,
+      averageScore: Math.floor(Math.random() * 20) + 75,
+      tags: [item.subject.toLowerCase(), 'elite', 'advanced', 'ifrane', isPaid ? 'premium' : 'gratuit'],
+      createdAt: new Date(Date.now() - Math.random() * 150 * 24 * 60 * 60 * 1000).toISOString(),
+      author: ['Prof. Dr. Youssef Boutaleb', 'Dr. Sarah El Gammal', 'Prof. Rachid Saadaoui'][Math.floor(Math.random() * 3)],
+      popularity: 'trending',
+      streakRequired: null,
+      timeRecord: null,
+      isBookmarked: Math.random() > 0.5,
+      isLiked: Math.random() > 0.4,
+      likes: Math.floor(Math.random() * 180) + 80,
+      shares: Math.floor(Math.random() * 100) + 40,
+      questions: generateQuestionsForSubject(300 + idx, questionsCount)
+    });
+  });
+  
+  // Ajouter des quizzes pour Université Sultan Moulay Slimane (Beni Mellal)
+  const usmslSubjects = [
+    { name: 'Programmation en Python', subject: 'Informatique', difficulty: 'easy' },
+    { name: 'Bases de Données Relationnelles', subject: 'Informatique', difficulty: 'medium' },
+    { name: 'Développement Web Frontend', subject: 'Informatique', difficulty: 'medium' },
+    { name: 'Systèmes d\'Exploitation', subject: 'Informatique', difficulty: 'hard' },
+    { name: 'Algèbre Linéaire Appliquée', subject: 'Mathématiques', difficulty: 'medium' },
+    { name: 'Analyse Mathématique II', subject: 'Mathématiques', difficulty: 'hard' },
+    { name: 'Probabilités et Statistiques', subject: 'Mathématiques', difficulty: 'medium' },
+    { name: 'Physique Générale', subject: 'Physique', difficulty: 'medium' },
+    { name: 'Chimie Organique', subject: 'Chimie', difficulty: 'hard' },
+    { name: 'Électricité et Électronique', subject: 'Électronique', difficulty: 'medium' }
+  ];
+  
+  usmslSubjects.forEach((item, idx) => {
+    const questionsCount = Math.floor(Math.random() * 10) + 15;
+    const duration = Math.floor(questionsCount * 1.5);
+    const isPaid = Math.random() > 0.55;
+    
+    quizzes.push({
+      id: quizId++,
+      title: item.name,
+      description: `Quiz complet pour les étudiants de l'Université Sultan Moulay Slimane. Module: ${item.subject}`,
+      subject: item.subject,
+      subjectId: 400 + idx,
+      university: 'Université Sultan Moulay Slimane',
+      universityId: 10,
+      faculty: 'Faculté des Sciences & Technologie',
+      facultyId: null,
+      level: 'S1-S4',
+      questionsCount,
+      duration,
+      participants: Math.floor(Math.random() * 2000) + 200,
+      difficulty: item.difficulty,
+      rating: (Math.random() * 1.3 + 3.5).toFixed(1),
+      isPro: false,
+      isPaid: isPaid,
+      price: isPaid ? 99 : 0,
+      isCompleted: Math.random() > 0.45,
+      bestScore: Math.random() > 0.35 ? Math.floor(Math.random() * 30) + 70 : null,
+      currentScore: Math.random() > 0.35 ? Math.floor(Math.random() * 30) + 60 : null,
+      completionRate: Math.floor(Math.random() * 30) + 70,
+      averageScore: Math.floor(Math.random() * 30) + 60,
+      tags: [item.subject.toLowerCase(), 'beni-mellal', 'sciences', isPaid ? 'premium' : 'gratuit'],
+      createdAt: new Date(Date.now() - Math.random() * 200 * 24 * 60 * 60 * 1000).toISOString(),
+      author: ['Prof. Bilal Chebli', 'Dr. Nora Zahra', 'Prof. Mohamed Bouslimi'][Math.floor(Math.random() * 3)],
+      popularity: 'popular',
+      streakRequired: null,
+      timeRecord: null,
+      isBookmarked: Math.random() > 0.7,
+      isLiked: Math.random() > 0.6,
+      likes: Math.floor(Math.random() * 100) + 20,
+      shares: Math.floor(Math.random() * 60) + 10,
+      questions: generateQuestionsForSubject(400 + idx, questionsCount)
+    });
+  });
+  
+  // Ajouter des quizzes pour Université Mohammed Premier (Oujda)
+  const umpSubjects = [
+    { name: 'Relations Internationales', subject: 'Sciences Politiques', difficulty: 'medium' },
+    { name: 'Diplomatie et Coopération', subject: 'Relations Internationales', difficulty: 'hard' },
+    { name: 'Droit International Public', subject: 'Droit', difficulty: 'hard' },
+    { name: 'Géopolitique du Maghreb', subject: 'Géopolitique', difficulty: 'medium' },
+    { name: 'Économie Internationale', subject: 'Économie', difficulty: 'medium' },
+    { name: 'Histoire de la Pensée Politique', subject: 'Sciences Politiques', difficulty: 'hard' },
+    { name: 'Organisation des Nations Unies', subject: 'Relations Internationales', difficulty: 'medium' },
+    { name: 'Intégration Régionale Africaine', subject: 'Études Africaines', difficulty: 'medium' },
+    { name: 'Sécurité et Stabilité Régionale', subject: 'Études Stratégiques', difficulty: 'hard' },
+    { name: 'Commerce International et Douanes', subject: 'Économie', difficulty: 'medium' }
+  ];
+  
+  umpSubjects.forEach((item, idx) => {
+    const questionsCount = Math.floor(Math.random() * 10) + 15;
+    const duration = Math.floor(questionsCount * 1.5);
+    const isPaid = Math.random() > 0.5;
+    
+    quizzes.push({
+      id: quizId++,
+      title: item.name,
+      description: `Quiz spécialisé pour l'Université Mohammed Premier. Domaine: ${item.subject}`,
+      subject: item.subject,
+      subjectId: 500 + idx,
+      university: 'Université Mohammed Premier',
+      universityId: 9,
+      faculty: 'Faculté des Sciences Appliquées',
+      facultyId: null,
+      level: 'S5-S6',
+      questionsCount,
+      duration,
+      participants: Math.floor(Math.random() * 1800) + 150,
+      difficulty: item.difficulty,
+      rating: (Math.random() * 1.2 + 3.7).toFixed(1),
+      isPro: false,
+      isPaid: isPaid,
+      price: isPaid ? 99 : 0,
+      isCompleted: Math.random() > 0.4,
+      bestScore: Math.random() > 0.3 ? Math.floor(Math.random() * 30) + 70 : null,
+      currentScore: Math.random() > 0.3 ? Math.floor(Math.random() * 30) + 65 : null,
+      completionRate: Math.floor(Math.random() * 25) + 75,
+      averageScore: Math.floor(Math.random() * 25) + 65,
+      tags: [item.subject.toLowerCase(), 'international', 'oujda', isPaid ? 'premium' : 'gratuit'],
+      createdAt: new Date(Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
+      author: ['Prof. Jamal Ouardi', 'Dr. Karim El Otmani', 'Prof. Leila Brahimi'][Math.floor(Math.random() * 3)],
+      popularity: 'trending',
+      streakRequired: null,
+      timeRecord: null,
+      isBookmarked: Math.random() > 0.6,
+      isLiked: Math.random() > 0.5,
+      likes: Math.floor(Math.random() * 130) + 40,
+      shares: Math.floor(Math.random() * 75) + 20,
+      questions: generateQuestionsForSubject(500 + idx, questionsCount)
+    });
+  });
+  
+  // Ajouter des quizzes pour Université Ibn Tofail (Kénitra)
+  const uitSubjects = [
+    { name: 'Chimie Analytique Avancée', subject: 'Chimie', difficulty: 'hard' },
+    { name: 'Chimie Inorganique', subject: 'Chimie', difficulty: 'medium' },
+    { name: 'Thermodynamique Chimique', subject: 'Chimie', difficulty: 'hard' },
+    { name: 'Biochimie Structurale', subject: 'Biochimie', difficulty: 'hard' },
+    { name: 'Physiologie Humaine', subject: 'Biologie', difficulty: 'medium' },
+    { name: 'Microbiologie Générale', subject: 'Microbiologie', difficulty: 'medium' },
+    { name: 'Écologie et Environnement', subject: 'Écologie', difficulty: 'medium' },
+    { name: 'Géologie Générale', subject: 'Géologie', difficulty: 'easy' },
+    { name: 'Minéralogie et Cristallographie', subject: 'Géologie', difficulty: 'hard' },
+    { name: 'Sciences de l\'Eau et Hydrogéologie', subject: 'Hydrogéologie', difficulty: 'medium' }
+  ];
+  
+  uitSubjects.forEach((item, idx) => {
+    const questionsCount = Math.floor(Math.random() * 10) + 15;
+    const duration = Math.floor(questionsCount * 1.5);
+    const isPaid = Math.random() > 0.5;
+    
+    quizzes.push({
+      id: quizId++,
+      title: item.name,
+      description: `Quiz complet pour l'Université Ibn Tofail. Matière: ${item.subject}`,
+      subject: item.subject,
+      subjectId: 600 + idx,
+      university: 'Université Ibn Tofail',
+      universityId: 4,
+      faculty: 'Faculté des Sciences',
+      facultyId: null,
+      level: 'S3-S6',
+      questionsCount,
+      duration,
+      participants: Math.floor(Math.random() * 2200) + 180,
+      difficulty: item.difficulty,
+      rating: (Math.random() * 1.3 + 3.6).toFixed(1),
+      isPro: false,
+      isPaid: isPaid,
+      price: isPaid ? 99 : 0,
+      isCompleted: Math.random() > 0.4,
+      bestScore: Math.random() > 0.3 ? Math.floor(Math.random() * 30) + 70 : null,
+      currentScore: Math.random() > 0.3 ? Math.floor(Math.random() * 30) + 60 : null,
+      completionRate: Math.floor(Math.random() * 30) + 70,
+      averageScore: Math.floor(Math.random() * 30) + 60,
+      tags: [item.subject.toLowerCase(), 'sciences', 'kenitra', isPaid ? 'premium' : 'gratuit'],
+      createdAt: new Date(Date.now() - Math.random() * 200 * 24 * 60 * 60 * 1000).toISOString(),
+      author: ['Prof. Samir Bennani', 'Dr. Khadija Saber', 'Prof. Abdellah Chakri'][Math.floor(Math.random() * 3)],
+      popularity: 'popular',
+      streakRequired: null,
+      timeRecord: null,
+      isBookmarked: Math.random() > 0.65,
+      isLiked: Math.random() > 0.55,
+      likes: Math.floor(Math.random() * 110) + 30,
+      shares: Math.floor(Math.random() * 65) + 15,
+      questions: generateQuestionsForSubject(600 + idx, questionsCount)
+    });
+  });
   
   return quizzes;
 };

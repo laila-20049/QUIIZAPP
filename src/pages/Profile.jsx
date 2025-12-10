@@ -30,7 +30,22 @@ import {
   XCircle,
   PieChart,
   RefreshCw,
-  Download
+  Download,
+  TrendingDown,
+  Activity,
+  Target as TargetIcon,
+  ChevronLeft,
+  ShieldCheck,
+  Eye,
+  EyeOff,
+  Heart,
+  Coffee,
+  Brain,
+  Calculator,
+  Code,
+  FlaskRound,
+  Scale,
+  Languages
 } from 'lucide-react';
 
 const Profile = () => {
@@ -45,6 +60,7 @@ const Profile = () => {
   const [progress, setProgress] = useState(null);
   const [recentActivity, setRecentActivity] = useState([]);
   const [badges, setBadges] = useState([]);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Formate la date
   const formatDate = (dateString) => {
@@ -52,7 +68,9 @@ const Profile = () => {
     return date.toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -61,7 +79,7 @@ const Profile = () => {
     totalScore: 5420,
     quizzesCompleted: 28,
     averageScore: 78,
-    totalTimeSpent: 2540, // en minutes
+    totalTimeSpent: 2540,
     currentStreak: 7,
     bestScore: 96,
     rank: 15,
@@ -70,20 +88,31 @@ const Profile = () => {
     xp: 4250,
     nextLevelXP: 5000,
     subjects: [
-      { name: "Mathématiques", score: 85, quizzes: 8 },
-      { name: "Physique", score: 78, quizzes: 6 },
-      { name: "Informatique", score: 92, quizzes: 10 },
-      { name: "Culture Générale", score: 74, quizzes: 4 }
+      { name: "Mathématiques", score: 85, quizzes: 8, icon: Calculator },
+      { name: "Physique", score: 78, quizzes: 6, icon: TargetIcon },
+      { name: "Informatique", score: 92, quizzes: 10, icon: Code },
+      { name: "Biologie", score: 74, quizzes: 4, icon: FlaskRound },
+      { name: "Droit", score: 68, quizzes: 3, icon: Scale },
+      { name: "Langues", score: 82, quizzes: 5, icon: Languages }
+    ],
+    weeklyProgress: [
+      { day: 'Lun', score: 78 },
+      { day: 'Mar', score: 82 },
+      { day: 'Mer', score: 85 },
+      { day: 'Jeu', score: 92 },
+      { day: 'Ven', score: 76 },
+      { day: 'Sam', score: 88 },
+      { day: 'Dim', score: 91 }
     ]
   };
 
   const demoBadges = [
-    { id: 1, name: "Débutant", icon: Trophy, color: "from-yellow-400 to-yellow-600", earned: true, date: "2024-01-15" },
-    { id: 2, name: "Quiz Master", icon: Crown, color: "from-purple-500 to-purple-700", earned: true, date: "2024-01-20" },
-    { id: 3, name: "Streak King", icon: Zap, color: "from-orange-500 to-orange-700", earned: true, date: "2024-02-01" },
-    { id: 4, name: "Perfect Score", icon: Star, color: "from-blue-500 to-blue-700", earned: false },
-    { id: 5, name: "Speed Demon", icon: TrendingUp, color: "from-green-500 to-green-700", earned: false },
-    { id: 6, name: "Subject Expert", icon: Award, color: "from-red-500 to-red-700", earned: false }
+    { id: 1, name: "Débutant", icon: Trophy, color: "from-yellow-500 to-amber-500", earned: true, date: "2024-01-15", description: "Premier quiz complété" },
+    { id: 2, name: "Quiz Master", icon: Crown, color: "from-purple-500 to-purple-600", earned: true, date: "2024-01-20", description: "10 quiz complétés" },
+    { id: 3, name: "Streak King", icon: Zap, color: "from-orange-500 to-red-500", earned: true, date: "2024-02-01", description: "7 jours consécutifs" },
+    { id: 4, name: "Perfection", icon: Star, color: "from-blue-500 to-cyan-500", earned: false, description: "Score 100% sur un quiz" },
+    { id: 5, name: "Vitesse", icon: TrendingUp, color: "from-green-500 to-emerald-500", earned: false, description: "Quiz terminé en 5min" },
+    { id: 6, name: "Expert", icon: Award, color: "from-red-500 to-pink-500", earned: false, description: "3 quiz dans une matière" }
   ];
 
   const demoActivity = [
@@ -91,27 +120,28 @@ const Profile = () => {
     { id: 2, type: "badge_earned", title: "Quiz Master", badge: "Master", date: "2024-02-14T10:15:00Z" },
     { id: 3, type: "quiz_completed", title: "Programmation Python", score: 85, date: "2024-02-13T16:45:00Z" },
     { id: 4, type: "rank_up", title: "Niveau Advanced", newLevel: "Advanced", date: "2024-02-12T09:20:00Z" },
-    { id: 5, type: "streak_milestone", title: "7 jours consécutifs", days: 7, date: "2024-02-11T18:30:00Z" }
+    { id: 5, type: "streak_milestone", title: "7 jours consécutifs", days: 7, date: "2024-02-11T18:30:00Z" },
+    { id: 6, type: "quiz_completed", title: "Mécanique Quantique", score: 79, date: "2024-02-10T11:45:00Z" }
   ];
 
   useEffect(() => {
     const loadProfileData = async () => {
       setLoading(true);
       
-      // Simulation de chargement des données
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       setProgress(demoProgress);
       setBadges(demoBadges.filter(b => b.earned));
       setRecentActivity(demoActivity);
       setEditForm({
-        firstName: user?.firstName || '',
-        lastName: user?.lastName || '',
-        email: user?.email || '',
-        university: user?.university || '',
-        faculty: user?.faculty || '',
-        level: user?.level || '',
-        bio: "Étudiant passionné par l'apprentissage et les quiz académiques."
+        firstName: user?.firstName || 'Ahmed',
+        lastName: user?.lastName || 'Alami',
+        email: user?.email || 'ahmed.alami@um5.ac.ma',
+        university: user?.university || 'Université Mohammed V Rabat',
+        faculty: user?.faculty || 'Faculté des Sciences',
+        level: user?.level || 'S4',
+        phone: '+212 6 12 34 56 78',
+        bio: "Étudiant passionné par les sciences et technologies. J'aime relever des défis et améliorer mes compétences."
       });
       
       setLoading(false);
@@ -150,37 +180,72 @@ const Profile = () => {
   const tabs = [
     { id: 'overview', name: 'Vue d\'ensemble', icon: User },
     { id: 'stats', name: 'Statistiques', icon: BarChart3 },
-    { id: 'activity', name: 'Activité', icon: TrendingUp },
+    { id: 'activity', name: 'Activité', icon: Activity },
     { id: 'badges', name: 'Badges', icon: Trophy },
     { id: 'settings', name: 'Paramètres', icon: Settings }
   ];
 
-  const StatCard = ({ icon: Icon, value, label, color }) => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 text-center hover:shadow-md transition-shadow">
-      <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg bg-gradient-to-r ${color} mb-3`}>
-        <Icon className="h-6 w-6 text-white" />
+  const StatCard = ({ icon: Icon, value, label, change, color = 'bg-gradient-to-r from-blue-500 to-blue-600' }) => (
+    <div className="group bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+      <div className="flex items-start justify-between mb-4">
+        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${color} shadow-md`}>
+          <Icon className="h-6 w-6 text-white" />
+        </div>
+        {change && (
+          <span className={`text-xs px-2 py-1 rounded-full ${change > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {change > 0 ? '+' : ''}{change}%
+          </span>
+        )}
       </div>
       <div className="text-2xl font-bold text-gray-900 mb-1">{value}</div>
       <div className="text-sm text-gray-600">{label}</div>
     </div>
   );
 
+  const SubjectCard = ({ subject }) => {
+    const Icon = subject.icon;
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-shadow">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-50 rounded-lg">
+              <Icon className="h-5 w-5 text-blue-600" />
+            </div>
+            <span className="font-medium text-gray-900">{subject.name}</span>
+          </div>
+          <span className="text-sm font-semibold text-gray-900">{subject.score}%</span>
+        </div>
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Progression</span>
+            <span>{subject.quizzes} quiz</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
+              style={{ width: `${subject.score}%` }}
+            ></div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const BadgeCard = ({ badge }) => {
     const Icon = badge.icon;
     return (
       <div className={`relative ${badge.earned ? '' : 'opacity-50'}`}>
-        <div className={`w-20 h-20 rounded-2xl bg-gradient-to-r ${badge.color} flex items-center justify-center mx-auto mb-2`}>
-          <Icon className="h-8 w-8 text-white" />
+        <div className={`w-full aspect-square rounded-2xl bg-gradient-to-br ${badge.color} flex items-center justify-center shadow-lg`}>
+          <Icon className="h-10 w-10 text-white" />
         </div>
-        <div className="text-center">
-          <div className="text-sm font-semibold text-gray-900">{badge.name}</div>
-          {badge.earned ? (
-            <div className="text-xs text-green-600 flex items-center justify-center gap-1 mt-1">
+        <div className="mt-4 space-y-1">
+          <div className="text-sm font-semibold text-gray-900 text-center">{badge.name}</div>
+          <div className="text-xs text-gray-500 text-center">{badge.description}</div>
+          {badge.earned && (
+            <div className="flex items-center justify-center gap-1 text-xs text-green-600 mt-2">
               <CheckCircle2 className="h-3 w-3" />
-              Obtenu
+              Obtenu le {formatDate(badge.date)}
             </div>
-          ) : (
-            <div className="text-xs text-gray-500 mt-1">À débloquer</div>
           )}
         </div>
       </div>
@@ -189,28 +254,29 @@ const Profile = () => {
 
   if (loading || authLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Skeleton Loading */}
-        <div className="animate-pulse">
-          {/* Header Skeleton */}
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
-          
-          {/* Profile Card Skeleton */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-            <div className="flex items-center gap-6">
-              <div className="w-24 h-24 bg-gray-200 rounded-full"></div>
-              <div className="flex-1">
-                <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-8">
+            {/* Header skeleton */}
+            <div className="h-10 bg-gray-200 rounded w-1/4"></div>
+            
+            {/* Profile card skeleton */}
+            <div className="bg-white rounded-2xl p-6">
+              <div className="flex items-center gap-6">
+                <div className="w-24 h-24 bg-gray-200 rounded-full"></div>
+                <div className="flex-1 space-y-4">
+                  <div className="h-6 bg-gray-200 rounded w-1/3"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                </div>
               </div>
             </div>
-          </div>
-          
-          {/* Stats Grid Skeleton */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
-            ))}
+            
+            {/* Stats skeleton */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -218,127 +284,99 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* En-tête */}
-        <div className="flex items-center justify-between mb-8">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
           <div>
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 group"
+            >
+              <ChevronLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+              Retour
+            </button>
             <h1 className="text-4xl font-bold text-gray-900">
-              Mon Profil
+              Mon <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Profil</span>
             </h1>
-            <p className="text-gray-600 mt-2">
-              Gérez votre compte et suivez votre progression
-            </p>
+            <p className="text-gray-600 mt-2">Suivez votre progression et gérez votre compte</p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap gap-3">
             <Link 
               to="/quizzes" 
-              className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-colors"
+              className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 flex items-center gap-2"
             >
               <BookOpen className="h-4 w-4" />
-              Reprendre un quiz
+              Nouveau Quiz
             </Link>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
             >
               <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Déconnexion</span>
+              Déconnexion
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid lg:grid-cols-4 gap-8">
           {/* Sidebar */}
-          <div className="lg:col-span-1">
-            {/* Carte de profil */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-              <div className="relative">
-                {/* Bannière */}
-                <div className="h-24 bg-gradient-to-r from-blue-600 to-blue-800"></div>
-                
-                {/* Photo de profil */}
-                <div className="absolute -bottom-12 left-6">
+          <div className="lg:col-span-1 space-y-6">
+            {/* Profile Card */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="relative h-32 bg-gradient-to-r from-blue-500 to-purple-500">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+              </div>
+              
+              <div className="relative px-6 pb-6">
+                <div className="absolute -top-16 left-6">
                   <div className="relative">
-                    <div className="w-24 h-24 rounded-full border-4 border-white bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white text-3xl font-bold">
+                    <div className="w-32 h-32 rounded-full border-4 border-white bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-4xl font-bold shadow-xl">
                       {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
                     </div>
                     {user?.isPro && (
-                      <div className="absolute -top-1 -right-1 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-1 rounded-full">
-                        <Crown className="h-4 w-4" />
+                      <div className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-white p-2 rounded-full shadow-lg">
+                        <Crown className="h-5 w-5" />
                       </div>
                     )}
                   </div>
                 </div>
-                
-                {/* Actions */}
-                <div className="absolute top-4 right-4">
-                  <button
-                    onClick={() => setIsEditing(!isEditing)}
-                    className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
-                  >
-                    <Edit className="h-4 w-4 text-gray-600" />
-                  </button>
-                </div>
-              </div>
 
-              {/* Informations */}
-              <div className="pt-16 pb-6 px-6">
-                <div className="text-center mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">
+                <div className="pt-20 text-center">
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">
                     {user?.firstName} {user?.lastName}
                   </h2>
-                  <p className="text-gray-600 text-sm">{user?.email}</p>
-                </div>
-
-                {/* Badges */}
-                <div className="flex justify-center gap-2 mb-6">
-                  {badges.slice(0, 3).map((badge, index) => {
-                    const Icon = badge.icon;
-                    return (
-                      <div 
-                        key={index}
-                        className={`w-8 h-8 rounded-lg bg-gradient-to-r ${badge.color} flex items-center justify-center`}
-                        title={badge.name}
-                      >
-                        <Icon className="h-4 w-4 text-white" />
-                      </div>
-                    );
-                  })}
-                  {badges.length > 3 && (
-                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center text-xs text-gray-600">
-                      +{badges.length - 3}
+                  <p className="text-gray-600 text-sm mb-4">@{user?.email?.split('@')[0]}</p>
+                  
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center gap-3 text-sm">
+                      <GraduationCap className="h-4 w-4 text-blue-500" />
+                      <span className="text-gray-700">{user?.university || "Non spécifiée"}</span>
                     </div>
-                  )}
-                </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <MapPin className="h-4 w-4 text-green-500" />
+                      <span className="text-gray-700">{user?.faculty || "Non spécifiée"}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <Target className="h-4 w-4 text-purple-500" />
+                      <span className="text-gray-700">Niveau {user?.level || "Non spécifié"}</span>
+                    </div>
+                  </div>
 
-                {/* Informations détaillées */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm">
-                    <GraduationCap className="h-4 w-4 text-blue-500" />
-                    <span className="text-gray-700">{user?.university || "Non spécifiée"}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <MapPin className="h-4 w-4 text-green-500" />
-                    <span className="text-gray-700">{user?.faculty || "Non spécifiée"}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Target className="h-4 w-4 text-purple-500" />
-                    <span className="text-gray-700">Niveau {user?.level || "Non spécifié"}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Shield className="h-4 w-4 text-yellow-500" />
-                    <span className="text-gray-700">
-                      {user?.isPro ? "Compte Premium" : "Compte Standard"}
-                    </span>
-                  </div>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="w-full py-2.5 border-2 border-blue-500 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Edit className="h-4 w-4" />
+                    Modifier le profil
+                  </button>
                 </div>
               </div>
             </div>
 
             {/* Navigation */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-4">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
               <nav className="space-y-1">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
@@ -346,41 +384,62 @@ const Profile = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors ${
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200 ${
                         activeTab === tab.id
-                          ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-600 border border-blue-200'
+                          ? 'bg-gradient-to-r from-blue-50 to-blue-100 text-blue-600 shadow-sm'
                           : 'text-gray-700 hover:bg-gray-50'
                       }`}
                     >
                       <Icon className="h-5 w-5" />
                       <span className="font-medium">{tab.name}</span>
-                      <ChevronRight className={`h-4 w-4 ml-auto transition-transform ${
-                        activeTab === tab.id ? 'rotate-90' : ''
-                      }`} />
+                      {activeTab === tab.id && (
+                        <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full"></div>
+                      )}
                     </button>
                   );
                 })}
               </nav>
             </div>
+
+            {/* Quick Stats */}
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100">
+              <h3 className="text-lg font-semibold text-blue-900 mb-4 flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                En bref
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-blue-700">Quiz ce mois</span>
+                  <span className="text-sm font-semibold text-blue-900">8</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-blue-700">Streak actuel</span>
+                  <span className="text-sm font-semibold text-blue-900">{progress?.currentStreak} jours</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-blue-700">Prochain objectif</span>
+                  <span className="text-sm font-semibold text-blue-900">Top 10</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Contenu principal */}
+          {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Vue d'ensemble */}
             {activeTab === 'overview' && (
               <div className="space-y-8">
-                {/* En-tête modifiable */}
+                {/* Editing Form */}
                 {isEditing ? (
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Modifier le profil</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-6">Modifier le profil</h3>
+                    <div className="grid md:grid-cols-2 gap-6 mb-8">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Prénom</label>
                         <input
                           type="text"
                           value={editForm.firstName}
                           onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div>
@@ -389,16 +448,16 @@ const Profile = () => {
                           type="text"
                           value={editForm.lastName}
                           onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Université</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
                         <input
-                          type="text"
-                          value={editForm.university}
-                          onChange={(e) => setEditForm({...editForm, university: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          type="tel"
+                          value={editForm.phone}
+                          onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div>
@@ -406,175 +465,196 @@ const Profile = () => {
                         <select
                           value={editForm.level}
                           onChange={(e) => setEditForm({...editForm, level: e.target.value})}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
                         >
-                          <option value="">Sélectionner</option>
-                          <option value="S1">S1</option>
-                          <option value="S2">S2</option>
-                          <option value="S3">S3</option>
-                          <option value="S4">S4</option>
-                          <option value="S5">S5</option>
-                          <option value="S6">S6</option>
+                          {['S1', 'S2', 'S3', 'S4', 'S5', 'S6'].map(level => (
+                            <option key={level} value={level}>Semestre {level}</option>
+                          ))}
                         </select>
                       </div>
-                    </div>
-                    <div className="mb-6">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
-                      <textarea
-                        value={editForm.bio}
-                        onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
-                        rows="3"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      />
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                        <textarea
+                          value={editForm.bio}
+                          onChange={(e) => setEditForm({...editForm, bio: e.target.value})}
+                          rows="3"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
                     </div>
                     <div className="flex justify-end gap-3">
                       <button
                         onClick={handleCancelEdit}
-                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50"
                       >
                         Annuler
                       </button>
                       <button
                         onClick={handleSaveProfile}
-                        className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700"
+                        className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:shadow-lg transition-all"
                       >
                         Sauvegarder
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-xl font-semibold text-gray-900">Progression générale</h3>
-                      <span className="px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full text-sm font-medium">
-                        {progress?.level}
-                      </span>
+                  /* Stats Grid */
+                  <>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                      <StatCard 
+                        icon={Trophy}
+                        value={progress?.totalScore.toLocaleString()}
+                        label="Score total"
+                        change={12}
+                        color="bg-gradient-to-r from-yellow-500 to-amber-500"
+                      />
+                      <StatCard 
+                        icon={BookOpen}
+                        value={progress?.quizzesCompleted}
+                        label="Quiz complétés"
+                        change={8}
+                        color="bg-gradient-to-r from-blue-500 to-blue-600"
+                      />
+                      <StatCard 
+                        icon={Star}
+                        value={`${progress?.averageScore}%`}
+                        label="Score moyen"
+                        change={5}
+                        color="bg-gradient-to-r from-green-500 to-emerald-500"
+                      />
+                      <StatCard 
+                        icon={Target}
+                        value={`#${progress?.rank}`}
+                        label="Classement"
+                        change={3}
+                        color="bg-gradient-to-r from-purple-500 to-purple-600"
+                      />
                     </div>
-                    <p className="text-gray-600 mb-6">
-                      {editForm.bio}
-                    </p>
-                  </div>
-                )}
 
-                {/* Statistiques principales */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <StatCard 
-                    icon={Trophy}
-                    value={progress?.totalScore.toLocaleString()}
-                    label="Score total"
-                    color="from-yellow-500 to-yellow-700"
-                  />
-                  <StatCard 
-                    icon={BookOpen}
-                    value={progress?.quizzesCompleted}
-                    label="Quiz complétés"
-                    color="from-blue-500 to-blue-700"
-                  />
-                  <StatCard 
-                    icon={Star}
-                    value={`${progress?.averageScore}%`}
-                    label="Score moyen"
-                    color="from-green-500 to-green-700"
-                  />
-                  <StatCard 
-                    icon={Clock}
-                    value={`${Math.floor(progress?.totalTimeSpent / 60)}h`}
-                    label="Temps d'étude"
-                    color="from-purple-500 to-purple-700"
-                  />
-                </div>
-
-                {/* Progression par matière */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6">Performance par matière</h3>
-                  <div className="space-y-4">
-                    {progress?.subjects?.map((subject, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="font-medium text-gray-900">{subject.name}</span>
-                          <span className="text-gray-700">{subject.score}% ({subject.quizzes} quiz)</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-500"
-                            style={{ width: `${subject.score}%` }}
-                          ></div>
-                        </div>
+                    {/* Subjects Performance */}
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-6">Performance par matière</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {progress?.subjects?.map((subject, index) => (
+                          <SubjectCard key={index} subject={subject} />
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
+
+                    {/* Weekly Progress */}
+                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-2xl font-bold text-gray-900">Progression hebdomadaire</h3>
+                        <span className="text-sm text-gray-500">Cette semaine</span>
+                      </div>
+                      <div className="h-48 flex items-end justify-between gap-4">
+                        {progress?.weeklyProgress?.map((day, index) => (
+                          <div key={index} className="flex flex-col items-center flex-1">
+                            <div 
+                              className="w-full bg-gradient-to-t from-blue-500 to-blue-600 rounded-t-lg transition-all duration-500 hover:from-blue-600 hover:to-blue-700"
+                              style={{ height: `${day.score}%` }}
+                              title={`${day.score}%`}
+                            ></div>
+                            <span className="text-sm text-gray-600 mt-2">{day.day}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
-            {/* Statistiques détaillées */}
             {activeTab === 'stats' && (
               <div className="space-y-8">
-                {/* Graphiques */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-6">Progression du score</h3>
-                    <div className="h-64 flex items-end justify-between gap-2">
-                      {[65, 72, 78, 82, 85, 78, 92].map((value, index) => (
-                        <div key={index} className="flex flex-col items-center">
-                          <div 
-                            className="w-8 bg-gradient-to-t from-blue-500 to-blue-600 rounded-t-lg"
-                            style={{ height: `${value}%` }}
-                          ></div>
-                          <span className="text-xs text-gray-500 mt-2">S{index + 1}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                {/* Detailed Stats */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-8">Statistiques détaillées</h3>
                   
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-6">Distribution des quiz</h3>
-                    <div className="h-64 flex items-center justify-center">
-                      <div className="relative w-48 h-48">
-                        <PieChart className="h-48 w-48 text-gray-300" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-gray-900">28</div>
-                            <div className="text-sm text-gray-600">Quiz total</div>
-                          </div>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div className="space-y-4 p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <Clock className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-gray-900">{Math.floor(progress?.totalTimeSpent / 60)}h</div>
+                          <div className="text-sm text-gray-600">Temps d'étude</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4 p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-100 rounded-lg">
+                          <TrendingUp className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-gray-900">{progress?.bestScore}%</div>
+                          <div className="text-sm text-gray-600">Meilleur score</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4 p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-100 rounded-lg">
+                          <Zap className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-gray-900">{progress?.currentStreak}</div>
+                          <div className="text-sm text-gray-600">Jours consécutifs</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4 p-4 bg-gray-50 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-yellow-100 rounded-lg">
+                          <Brain className="h-5 w-5 text-yellow-600" />
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-gray-900">{progress?.xp}/{progress?.nextLevelXP}</div>
+                          <div className="text-sm text-gray-600">XP vers le niveau</div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Informations détaillées */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6">Détails des performances</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Meilleur score</span>
-                        <span className="font-semibold text-gray-900">{progress?.bestScore}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Streak actuel</span>
-                        <span className="font-semibold text-gray-900">{progress?.currentStreak} jours</span>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Classement</span>
-                        <span className="font-semibold text-gray-900">#{progress?.rank}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">XP total</span>
-                        <span className="font-semibold text-gray-900">{progress?.xp}/{progress?.nextLevelXP}</span>
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-4">Performance</h4>
+                      <div className="space-y-4">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Taux de réussite</span>
+                          <span className="font-semibold text-gray-900">84%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Temps moyen / quiz</span>
+                          <span className="font-semibold text-gray-900">12 min</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Questions réussies</span>
+                          <span className="font-semibold text-gray-900">856</span>
+                        </div>
                       </div>
                     </div>
-                    <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Taux de réussite</span>
-                        <span className="font-semibold text-gray-90">84%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Temps moyen par quiz</span>
-                        <span className="font-semibold text-gray-900">12 min</span>
+                    
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-4">Classement</h4>
+                      <div className="space-y-4">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Position globale</span>
+                          <span className="font-semibold text-gray-900">#{progress?.rank}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Top dans ta faculté</span>
+                          <span className="font-semibold text-gray-900">#3</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Évolution 30j</span>
+                          <span className="font-semibold text-green-600">+8 places</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -582,34 +662,42 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Activité récente */}
             {activeTab === 'activity' && (
-              <div className="space-y-6">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6">Activité récente</h3>
-                  <div className="space-y-4">
-                    {recentActivity.map((activity, index) => (
-                      <div key={activity.id} className="flex items-start gap-4 pb-4 border-b border-gray-100 last:border-0">
-                        <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
+              <div className="space-y-8">
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-8">Activité récente</h3>
+                  
+                  <div className="space-y-6">
+                    {recentActivity.map((activity) => (
+                      <div key={activity.id} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                        <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
                           activity.type === 'quiz_completed' ? 'bg-green-100 text-green-600' :
                           activity.type === 'badge_earned' ? 'bg-yellow-100 text-yellow-600' :
                           'bg-blue-100 text-blue-600'
                         }`}>
-                          {activity.type === 'quiz_completed' && <Trophy className="h-5 w-5" />}
-                          {activity.type === 'badge_earned' && <Award className="h-5 w-5" />}
-                          {activity.type === 'rank_up' && <TrendingUp className="h-5 w-5" />}
-                          {activity.type === 'streak_milestone' && <Zap className="h-5 w-5" />}
+                          {activity.type === 'quiz_completed' && <Trophy className="h-6 w-6" />}
+                          {activity.type === 'badge_earned' && <Award className="h-6 w-6" />}
+                          {activity.type === 'rank_up' && <TrendingUp className="h-6 w-6" />}
+                          {activity.type === 'streak_milestone' && <Zap className="h-6 w-6" />}
                         </div>
+                        
                         <div className="flex-1">
-                          <div className="font-medium text-gray-900">{activity.title}</div>
-                          {activity.score && (
-                            <div className="text-sm text-gray-600 mt-1">
-                              Score: <span className="font-semibold">{activity.score}%</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="text-sm text-gray-500 whitespace-nowrap">
-                          {formatDate(activity.date)}
+                          <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-4">
+                            <div className="font-semibold text-gray-900">{activity.title}</div>
+                            {activity.score && (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
+                                Score: {activity.score}%
+                              </span>
+                            )}
+                            {activity.newLevel && (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                                {activity.newLevel}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-sm text-gray-600 mt-2">
+                            {formatDate(activity.date)}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -618,18 +706,30 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Badges */}
             {activeTab === 'badges' && (
               <div className="space-y-8">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900">Mes badges</h3>
-                    <div className="text-sm text-gray-600">
-                      {badges.length} sur {demoBadges.length} débloqués
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900">Badges et réalisations</h3>
+                      <p className="text-gray-600 mt-2">
+                        {badges.length} sur {demoBadges.length} badges débloqués
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+                          style={{ width: `${(badges.length / demoBadges.length) * 100}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {Math.round((badges.length / demoBadges.length) * 100)}%
+                      </span>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                     {demoBadges.map(badge => (
                       <BadgeCard key={badge.id} badge={badge} />
                     ))}
@@ -638,53 +738,90 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Paramètres */}
             {activeTab === 'settings' && (
-              <div className="space-y-6">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-6">Paramètres du compte</h3>
-                  <div className="space-y-6">
+              <div className="space-y-8">
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-8">Paramètres du compte</h3>
+                  
+                  <div className="space-y-8">
+                    {/* Notifications */}
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-4">Notifications</h4>
-                      <div className="space-y-3">
-                        <label className="flex items-center">
-                          <input type="checkbox" className="h-4 w-4 text-blue-600" defaultChecked />
-                          <span className="ml-2 text-gray-700">Quiz recommandés</span>
-                        </label>
-                        <label className="flex items-center">
-                          <input type="checkbox" className="h-4 w-4 text-blue-600" defaultChecked />
-                          <span className="ml-2 text-gray-700">Rappels de progression</span>
-                        </label>
-                        <label className="flex items-center">
-                          <input type="checkbox" className="h-4 w-4 text-blue-600" />
-                          <span className="ml-2 text-gray-700">Newsletter</span>
-                        </label>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <Bell className="h-5 w-5" />
+                        Notifications
+                      </h4>
+                      <div className="space-y-3 bg-gray-50 p-6 rounded-xl">
+                        {[
+                          { label: 'Quiz recommandés', description: 'Recevoir des suggestions de quiz' },
+                          { label: 'Progression', description: 'Mises à jour de votre progression' },
+                          { label: 'Badges', description: 'Nouveaux badges débloqués' },
+                          { label: 'Classement', description: 'Évolution de votre classement' }
+                        ].map((item, index) => (
+                          <label key={index} className="flex items-center justify-between p-3 hover:bg-white rounded-lg cursor-pointer">
+                            <div>
+                              <div className="font-medium text-gray-900">{item.label}</div>
+                              <div className="text-sm text-gray-600">{item.description}</div>
+                            </div>
+                            <input type="checkbox" defaultChecked className="h-5 w-5 text-blue-600 rounded" />
+                          </label>
+                        ))}
                       </div>
                     </div>
 
+                    {/* Security */}
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-4">Sécurité</h4>
-                      <button className="w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-medium text-gray-900">Changer le mot de passe</div>
-                            <div className="text-sm text-gray-600">Mettre à jour votre mot de passe régulièrement</div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <ShieldCheck className="h-5 w-5" />
+                        Sécurité
+                      </h4>
+                      <div className="space-y-4">
+                        <div className="p-4 border border-gray-200 rounded-xl">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe actuel</label>
+                          <div className="relative">
+                            <input
+                              type={showPassword ? 'text' : 'password'}
+                              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                              defaultValue="••••••••"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                            >
+                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
                           </div>
-                          <ChevronRight className="h-5 w-5 text-gray-400" />
                         </div>
-                      </button>
+                        <button className="w-full py-3 border-2 border-blue-500 text-blue-600 rounded-xl hover:bg-blue-50 transition-colors font-medium">
+                          Changer le mot de passe
+                        </button>
+                      </div>
                     </div>
 
+                    {/* Data Management */}
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-4">Données</h4>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Gestion des données</h4>
                       <div className="space-y-3">
-                        <button className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                          <div className="font-medium text-gray-900">Exporter mes données</div>
-                          <Download className="h-5 w-5 text-gray-400" />
+                        <button className="w-full flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <Download className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium text-gray-900">Exporter mes données</div>
+                              <div className="text-sm text-gray-600">Télécharger l'historique complet</div>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-gray-400" />
                         </button>
-                        <button className="w-full flex items-center justify-between p-4 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
-                          <div className="font-medium">Supprimer mon compte</div>
-                          <XCircle className="h-5 w-5" />
+                        
+                        <button className="w-full flex items-center justify-between p-4 border border-red-200 text-red-600 rounded-xl hover:bg-red-50 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <XCircle className="h-5 w-5" />
+                            <div>
+                              <div className="font-medium">Supprimer mon compte</div>
+                              <div className="text-sm">Cette action est irréversible</div>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5" />
                         </button>
                       </div>
                     </div>

@@ -27,9 +27,9 @@ import {
   RefreshCw,
   Activity
 } from 'lucide-react';
-import { useDatabase } from '../hooks/useDatabase';
-import LoadingSpinner from '../components/LoadingSpinner';
-import ErrorBoundary from '../components/ErrorBoundary';
+import { useDatabase } from '../../hooks/useDatabase';
+import LoadingSpinner from '../../components/common/LoadingSpinner';
+import ErrorBoundary from '../../components/common/ErrorBoundary';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
