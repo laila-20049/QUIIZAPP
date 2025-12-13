@@ -12,7 +12,6 @@ const QuizDetail = lazy(() => import('../pages/QuizDetail'));
 const QuizPlay = lazy(() => import('../pages/QuizPlay'));
 const Login = lazy(() => import('../pages/Login'));
 const Register = lazy(() => import('../pages/Register'));
-const ForgotPassword = lazy(() => import('../pages/ForgotPassword'));
 const Profile = lazy(() => import('../pages/Profile'));
 const UserDashboard = lazy(() => import('../pages/UserDashboard'));
 const Leaderboard = lazy(() => import('../pages/Leaderboard'));
@@ -180,14 +179,6 @@ const AppRouter = () => {
           <PublicOnlyRoute>
             <AuthLayout>
               <Register />
-            </AuthLayout>
-          </PublicOnlyRoute>
-        } />
-        
-        <Route path="/forgot-password" element={
-          <PublicOnlyRoute>
-            <AuthLayout>
-              <ForgotPassword />
             </AuthLayout>
           </PublicOnlyRoute>
         } />

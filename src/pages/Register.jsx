@@ -100,7 +100,7 @@ const interests = [
   { id: 'books', name: 'Lecture', icon: BookOpen, color: 'from-blue-500 to-blue-600' }
 ];
 
-const Register = () => {
+export default function Register() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({ 
     fullName: '',
@@ -125,9 +125,11 @@ const Register = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [academicInfo, setAcademicInfo] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const { register, isLoading, error, clearError } = useAuth();
   const navigate = useNavigate();
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     setAnimateIn(true);
@@ -262,6 +264,11 @@ const Register = () => {
     const { name, value, type, checked } = e.target;
     const newValue = type === 'checkbox' ? checked : value;
     
+    // Clear success message when user edits form
+    if (successMessage) {
+      setSuccessMessage('');
+    }
+    
     setFormData(prev => ({ 
       ...prev, 
       [name]: newValue
@@ -395,56 +402,36 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    Object.keys(formData).forEach(key => {
-      setTouched(prev => ({ ...prev, [key]: true }));
-    });
-    
-    let isValid = true;
-    Object.keys(formData).forEach(key => {
-      if (key !== 'studentId' && key !== 'phone' && key !== 'interests' && key !== 'newsletter') {
-        const valid = validateField(key, formData[key]);
-        if (!valid) isValid = false;
-      }
-    });
-    
-    if (!isValid) {
-      setIsSubmitting(false);
-      return;
-    }
-    
-    const university = moroccanUniversities.find(u => u.id === formData.university);
-    const faculty = moroccanFaculties.find(f => f.id === formData.faculty);
-    const studyLevel = studyLevels.find(l => l.id === formData.studyLevel);
-    
-    const registrationData = {
-      name: formData.fullName,
-      email: formData.email,
-      password: formData.password,
-      university: university?.name,
-      faculty: faculty?.name,
-      studyLevel: studyLevel?.name,
-      studentId: formData.studentId || undefined,
-      phone: formData.phone || undefined,
-      interests: selectedInterests,
-      newsletter: formData.newsletter
+
+    const form = new FormData(e.currentTarget);
+    const user = {
+      name: form.get("name"),
+      email: form.get("email"),
+      // Ne jamais stocker le mot de passe en clair en prod
+      password: form.get("password"),
+      createdAt: new Date().toISOString(),
     };
-    
-    const result = await register(registrationData);
-    setIsSubmitting(false);
-    
-    if (result.success) {
-      setRegistrationSuccess(true);
-      setTimeout(() => {
-        navigate('/login', { 
-          state: { 
-            message: 'Inscription réussie ! Vous pouvez maintenant vous connecter.',
-            email: formData.email
-          }
-        });
-      }, 2000);
+
+    try {
+      // Simulation d’API
+      await new Promise((r) => setTimeout(r, 800));
+
+      // Persistance (démo)
+      localStorage.setItem("qa:user", JSON.stringify(user));
+      localStorage.setItem("qa:isAuthenticated", "true");
+
+      setSuccessMessage("🎉 Votre compte a été créé avec succès !");
+      setSuccess("Compte créé avec succès !");
+      setIsSubmitting(false);
+
+      // Redirection
+      setTimeout(() => navigate("/dashboard"), 1200);
+    } catch (err) {
+      console.error(err);
+      setIsSubmitting(false);
+      setSuccess(null);
     }
-  };
+  }
 
   const stats = [
     { number: '75K+', label: 'Étudiants actifs', icon: Users, color: 'from-blue-500 to-blue-600', description: 'Communauté grandissante' },
@@ -1276,6 +1263,18 @@ const Register = () => {
                   </div>
                 )}
 
+                {/* Success Message */}
+                {successMessage && (
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-500 rounded-xl p-4 flex items-center gap-3 animate-bounce">
+                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                      <CheckCircle2 className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-green-800 font-bold text-lg">{successMessage}</p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Navigation Buttons */}
                 <div className="flex gap-4 pt-8">
                   {currentStep > 1 && (
@@ -1368,5 +1367,3 @@ const Register = () => {
     </div>
   );
 };
-
-export default Register;
