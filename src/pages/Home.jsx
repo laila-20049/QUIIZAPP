@@ -613,7 +613,7 @@ const Home = () => {
                 Les quiz seront bientôt ajoutés à la plateforme
               </p>
               <Link 
-                to="/quizzes/create" 
+                to="/admin/quiz/create" 
                 className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
                 <Rocket className="h-5 w-5" />

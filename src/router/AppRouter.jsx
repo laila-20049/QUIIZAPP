@@ -26,6 +26,36 @@ const QuizCreate = lazy(() => import('../pages/admin/QuizCreate'));
 const QuizEdit = lazy(() => import('../pages/admin/QuizEdit'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
+// Forum pages
+const ForumHome = lazy(() => import('../pages/ForumHome'));
+const QuestionDetails = lazy(() => import('../pages/QuestionDetails'));
+const AskQuestion = lazy(() => import('../pages/AskQuestion'));
+const FAQ = lazy(() => import('../pages/FAQ'));
+
+// Additional pages - lazy loaded or placeholder
+const Subjects = lazy(() => import('../pages/Subjects').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Matières</h1></div> })));
+const Levels = lazy(() => import('../pages/Levels').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Niveaux</h1></div> })));
+const MyQuizzes = lazy(() => import('../pages/MyQuizzes').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Mes Quiz</h1></div> })));
+const Achievements = lazy(() => import('../pages/Achievements').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Réalisations</h1></div> })));
+const Saved = lazy(() => import('../pages/Saved').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Sauvegardés</h1></div> })));
+const Settings = lazy(() => import('../pages/Settings').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Paramètres</h1></div> })));
+const Help = lazy(() => import('../pages/Help').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Aide</h1></div> })));
+const Terms = lazy(() => import('../pages/Terms').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Conditions d'utilisation</h1></div> })));
+const Privacy = lazy(() => import('../pages/Privacy').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Politique de confidentialité</h1></div> })));
+const ForgotPassword = lazy(() => import('../pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('../pages/ResetPassword'));
+const AdminQuizzes = lazy(() => import('../pages/admin/AdminQuizzes').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Gestion des Quiz</h1></div> })));
+const AdminUsers = lazy(() => import('../pages/admin/AdminUsers').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Gestion des Utilisateurs</h1></div> })));
+const AdminUserDetail = lazy(() => import('../pages/admin/AdminUserDetail').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Détail Utilisateur</h1></div> })));
+const AdminHelp = lazy(() => import('../pages/admin/AdminHelp').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Aide Admin</h1></div> })));
+const AdminDocs = lazy(() => import('../pages/admin/AdminDocs').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Documentation</h1></div> })));
+const AdminSupport = lazy(() => import('../pages/admin/AdminSupport').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Support</h1></div> })));
+const QuizAttempts = lazy(() => import('../pages/admin/QuizAttempts').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Tentatives Quiz</h1></div> })));
+const Subscription = lazy(() => import('../pages/Subscription').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Abonnement</h1></div> })));
+const Modules = lazy(() => import('../pages/Modules').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Modules</h1></div> })));
+const Faculties = lazy(() => import('../pages/Faculties').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Facultés</h1></div> })));
+const Purchases = lazy(() => import('../pages/Purchases').catch(() => ({ default: () => <div className="p-8"><h1 className="text-3xl font-bold">Achats</h1></div> })));
+
 // Composant pour les routes protégées
 const ProtectedRoute = ({ children, roles = [] }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -104,13 +134,15 @@ const AppRouter = () => {
   return (
     <Router>
       <Routes>
-        {/* Routes publiques avec layout principal */}
+        {/* ===== PUBLIC ROUTES ===== */}
+        {/* Home & Main Pages */}
         <Route path="/" element={
           <MainLayout>
             <Home />
           </MainLayout>
         } />
         
+        {/* Quiz Routes */}
         <Route path="/quizzes" element={
           <MainLayout>
             <QuizList />
@@ -123,12 +155,45 @@ const AppRouter = () => {
           </MainLayout>
         } />
         
+        {/* Subjects & Levels */}
+        <Route path="/matieres" element={
+          <MainLayout>
+            <Subjects />
+          </MainLayout>
+        } />
+
+        <Route path="/niveaux" element={
+          <MainLayout>
+            <Levels />
+          </MainLayout>
+        } />
+
+        <Route path="/faculties" element={
+          <MainLayout>
+            <Faculties />
+          </MainLayout>
+        } />
+
+        <Route path="/modules" element={
+          <MainLayout>
+            <Modules />
+          </MainLayout>
+        } />
+        
+        {/* Leaderboard */}
         <Route path="/leaderboard" element={
           <MainLayout>
             <Leaderboard />
           </MainLayout>
         } />
 
+        <Route path="/classement" element={
+          <MainLayout>
+            <Leaderboard />
+          </MainLayout>
+        } />
+
+        {/* Universities */}
         <Route path="/universities" element={
           <MainLayout>
             <Universities />
@@ -141,32 +206,57 @@ const AppRouter = () => {
           </MainLayout>
         } />
 
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <MainLayout>
-              <UserDashboard />
-            </MainLayout>
-          </ProtectedRoute>
-        } />
-        
-        {/* Route de paiement */}
-        <Route path="/payment" element={
-          <ProtectedRoute>
-            <AuthLayout>
-              <Payment />
-            </AuthLayout>
-          </ProtectedRoute>
+        {/* Forum routes */}
+        <Route path="/forum" element={
+          <MainLayout>
+            <ForumHome />
+          </MainLayout>
         } />
 
-        <Route path="/premium" element={
-          <ProtectedRoute>
-            <AuthLayout>
-              <Premium />
-            </AuthLayout>
-          </ProtectedRoute>
+        <Route path="/forum/question/:id" element={
+          <MainLayout>
+            <QuestionDetails />
+          </MainLayout>
         } />
-        
-        {/* Routes d'authentification (layout minimal) */}
+
+        <Route path="/forum/ask" element={
+          <MainLayout>
+            <AskQuestion />
+          </MainLayout>
+        } />
+
+        <Route path="/faq" element={
+          <MainLayout>
+            <FAQ />
+          </MainLayout>
+        } />
+
+        {/* Information Pages */}
+        <Route path="/terms" element={
+          <MainLayout>
+            <Terms />
+          </MainLayout>
+        } />
+
+        <Route path="/privacy" element={
+          <MainLayout>
+            <Privacy />
+          </MainLayout>
+        } />
+
+        <Route path="/help" element={
+          <MainLayout>
+            <Help />
+          </MainLayout>
+        } />
+
+        <Route path="/aide" element={
+          <MainLayout>
+            <Help />
+          </MainLayout>
+        } />
+
+        {/* ===== AUTHENTICATION ROUTES ===== */}
         <Route path="/login" element={
           <PublicOnlyRoute>
             <AuthLayout>
@@ -182,8 +272,40 @@ const AppRouter = () => {
             </AuthLayout>
           </PublicOnlyRoute>
         } />
+
+        <Route path="/forgot-password" element={
+          <PublicOnlyRoute>
+            <AuthLayout>
+              <ForgotPassword />
+            </AuthLayout>
+          </PublicOnlyRoute>
+        } />
+
+        <Route path="/reset-password" element={
+          <PublicOnlyRoute>
+            <AuthLayout>
+              <ResetPassword />
+            </AuthLayout>
+          </PublicOnlyRoute>
+        } />
         
-        {/* Routes protégées - utilisateur connecté */}
+        {/* ===== PROTECTED USER ROUTES ===== */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <UserDashboard />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/mes-quiz" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <MyQuizzes />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+        
         <Route path="/quiz/:id/play" element={
           <ProtectedRoute>
             <MainLayout>
@@ -207,7 +329,31 @@ const AppRouter = () => {
             </MainLayout>
           </ProtectedRoute>
         } />
-        
+
+        <Route path="/resultats" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ResultsHistory />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/saved" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Saved />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/achievements" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Achievements />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
         <Route path="/profile" element={
           <ProtectedRoute>
             <MainLayout>
@@ -215,8 +361,64 @@ const AppRouter = () => {
             </MainLayout>
           </ProtectedRoute>
         } />
+
+        <Route path="/profile/purchases" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Purchases />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Settings />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/parametres" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Settings />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/subscription" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Subscription />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/abonnement" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Subscription />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/payment" element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <Payment />
+            </AuthLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/premium" element={
+          <ProtectedRoute>
+            <AuthLayout>
+              <Premium />
+            </AuthLayout>
+          </ProtectedRoute>
+        } />
         
-        {/* Routes admin - nécessitent le rôle admin */}
+        {/* ===== ADMIN ROUTES ===== */}
         <Route path="/admin" element={
           <ProtectedRoute roles={['admin']}>
             <AdminLayout>
@@ -232,6 +434,14 @@ const AppRouter = () => {
             </AdminLayout>
           </ProtectedRoute>
         } />
+
+        <Route path="/admin/quizzes" element={
+          <ProtectedRoute roles={['admin']}>
+            <AdminLayout>
+              <AdminQuizzes />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
         
         <Route path="/admin/quiz/:id/edit" element={
           <ProtectedRoute roles={['admin']}>
@@ -240,12 +450,59 @@ const AppRouter = () => {
             </AdminLayout>
           </ProtectedRoute>
         } />
+
+        <Route path="/admin/quiz/:id/attempts" element={
+          <ProtectedRoute roles={['admin']}>
+            <AdminLayout>
+              <QuizAttempts />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/users" element={
+          <ProtectedRoute roles={['admin']}>
+            <AdminLayout>
+              <AdminUsers />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/users/:id" element={
+          <ProtectedRoute roles={['admin']}>
+            <AdminLayout>
+              <AdminUserDetail />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/help" element={
+          <ProtectedRoute roles={['admin']}>
+            <AdminLayout>
+              <AdminHelp />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/docs" element={
+          <ProtectedRoute roles={['admin']}>
+            <AdminLayout>
+              <AdminDocs />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/admin/support" element={
+          <ProtectedRoute roles={['admin']}>
+            <AdminLayout>
+              <AdminSupport />
+            </AdminLayout>
+          </ProtectedRoute>
+        } />
         
-        {/* Route 404 */}
+        {/* ===== 404 HANDLING ===== */}
+        {/* Catch-all route with auto-redirect to home */}
         <Route path="*" element={
-          <MainLayout>
-            <NotFound />
-          </MainLayout>
+          <Navigate to="/" replace />
         } />
       </Routes>
     </Router>

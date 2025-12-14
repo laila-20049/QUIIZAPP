@@ -282,7 +282,7 @@ const Payment = () => {
               <ChevronRight className="h-5 w-5" />
             </button>
             <button
-              onClick={() => navigate('/profile/purchases')}
+              onClick={() => navigate('/profile')}
               className="w-full border-2 border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-all"
             >
               Voir mes achats
