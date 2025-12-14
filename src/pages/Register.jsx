@@ -50,138 +50,6 @@ import {
   Languages
 } from 'lucide-react';
 
-// Composants réutilisables pour réduire le code
-const TextInput = ({
-  name,
-  value,
-  onChange,
-  onBlur,
-  placeholder,
-  Icon,
-  error,
-  touched
-}) => (
-  <div className="space-y-3">
-    <div className="relative group">
-      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-        <Icon className={`h-5 w-5 transition-colors ${
-          error ? 'text-red-500' : value && !error ? 'text-green-500' : 'text-gray-400 group-hover:text-blue-500'
-        }`} />
-      </div>
-      <input
-        name={name}
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        className={`block w-full pl-12 pr-10 py-4 rounded-xl border-2 transition-all duration-300 focus:ring-0 focus:outline-none focus:border-blue-500 ${
-          error
-            ? 'border-red-300 bg-red-50'
-            : value && !error
-            ? 'border-green-300 bg-green-50'
-            : 'border-gray-300 bg-gray-50 group-hover:border-blue-400'
-        }`}
-        placeholder={placeholder}
-      />
-      {value && !error && (
-        <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
-          <CheckCircle2 className="h-5 w-5 text-green-500" />
-        </div>
-      )}
-    </div>
-    {error && touched && (
-      <p className="text-sm text-red-600 flex items-center gap-2">
-        <AlertCircle className="h-4 w-4" />
-        {error}
-      </p>
-    )}
-  </div>
-);
-
-const PasswordInput = ({
-  name,
-  value,
-  onChange,
-  onBlur,
-  placeholder,
-  error,
-  touched,
-  show,
-  toggleShow
-}) => (
-  <div className="space-y-3">
-    <div className="relative group">
-      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-        <Lock className={`h-5 w-5 transition-colors ${
-          error ? 'text-red-500' : value && !error ? 'text-green-500' : 'text-gray-400 group-hover:text-blue-500'
-        }`} />
-      </div>
-      <input
-        name={name}
-        type={show ? 'text' : 'password'}
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        className={`block w-full pl-12 pr-12 py-4 rounded-xl border-2 transition-all duration-300 focus:ring-0 focus:outline-none focus:border-blue-500 ${
-          error
-            ? 'border-red-300 bg-red-50'
-            : value && !error
-            ? 'border-green-300 bg-green-50'
-            : 'border-gray-300 bg-gray-50 group-hover:border-blue-400'
-        }`}
-        placeholder={placeholder}
-      />
-      <button type="button" onClick={toggleShow} className="absolute inset-y-0 right-0 pr-4 flex items-center">
-        {show ? (
-          <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
-        ) : (
-          <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
-        )}
-      </button>
-    </div>
-    {error && touched && (
-      <p className="text-sm text-red-600 flex items-center gap-2">
-        <AlertCircle className="h-4 w-4" />
-        {error}
-      </p>
-    )}
-  </div>
-);
-
-const SelectCard = ({ selected, onClick, children, className = '' }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`group p-4 rounded-2xl border-2 transition-all duration-300 ${
-      selected
-        ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg'
-        : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
-    } ${className}`}
-  >
-    {children}
-  </button>
-);
-
-const InterestPill = ({ selected, onClick, Icon, name, color }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    className={`group p-4 rounded-xl border-2 transition-all duration-300 ${
-      selected
-        ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg'
-        : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
-    }`}
-  >
-    <div className="flex flex-col items-center gap-2">
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-        selected ? `bg-gradient-to-r ${color} text-white` : 'bg-gray-100 text-gray-600'
-      }`}>
-        <Icon className="h-6 w-6" />
-      </div>
-      <div className="text-sm font-medium text-gray-900">{name}</div>
-    </div>
-  </button>
-);
-
 // Universités marocaines
 const moroccanUniversities = [
   { id: 'um5', name: 'Université Mohammed V de Rabat', domain: '@um5.ac.ma', color: 'from-red-500 to-red-600', logo: '🦁', city: 'Rabat', students: '45K+' },
@@ -833,7 +701,7 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Formulaire Card */}
+            {/* FORM START - Wrapping entire form content */}
             <form onSubmit={handleSubmit} className="bg-gradient-to-br from-white to-blue-50 rounded-3xl shadow-2xl border border-gray-200 overflow-hidden">
               {/* Header */}
               <div className="relative bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 p-8 text-center overflow-hidden">
@@ -873,57 +741,144 @@ export default function Register() {
                 {currentStep === 1 && (
                   <div className="space-y-8">
                     {/* Full Name */}
-                    <label className="block text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <User className="h-5 w-5 text-blue-600" />
-                      Nom complet
-                    </label>
-                    <TextInput
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      onBlur={() => handleBlur('fullName')}
-                      placeholder="Ex: Ahmed El Mansouri"
-                      Icon={User}
-                      error={errors.fullName}
-                      touched={touched.fullName}
-                    />
+                    <div className="space-y-3">
+                      <label className="block text-sm font-semibold text-gray-900">
+                        <span className="flex items-center gap-2">
+                          <User className="h-5 w-5 text-blue-600" />
+                          Nom complet
+                        </span>
+                      </label>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <User className={`h-5 w-5 transition-colors ${
+                            errors.fullName ? 'text-red-500' : 
+                            formData.fullName && !errors.fullName ? 'text-green-500' : 'text-gray-400 group-hover:text-blue-500'
+                          }`} />
+                        </div>
+                        <input
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleChange}
+                          onBlur={() => handleBlur('fullName')}
+                          className={`block w-full pl-12 pr-10 py-4 rounded-xl border-2 transition-all duration-300 focus:ring-0 focus:outline-none focus:border-blue-500 ${
+                            errors.fullName 
+                              ? 'border-red-300 bg-red-50' 
+                              : formData.fullName && !errors.fullName
+                              ? 'border-green-300 bg-green-50'
+                              : 'border-gray-300 bg-gray-50 group-hover:border-blue-400'
+                          }`}
+                          placeholder="Ex: Ahmed El Mansouri"
+                        />
+                        {formData.fullName && !errors.fullName && (
+                          <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                            <CheckCircle2 className="h-5 w-5 text-green-500" />
+                          </div>
+                        )}
+                      </div>
+                      {errors.fullName && touched.fullName && (
+                        <p className="text-sm text-red-600 flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4" />
+                          {errors.fullName}
+                        </p>
+                      )}
+                    </div>
 
                     {/* Email */}
-                    <label className="block text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <Mail className="h-5 w-5 text-blue-600" />
-                      Email universitaire
-                    </label>
-                    <TextInput
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      onBlur={() => handleBlur('email')}
-                      placeholder="nom.prenom@universite.ac.ma"
-                      Icon={Mail}
-                      error={errors.email}
-                      touched={touched.email}
-                    />
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <Shield className="h-3 w-3" />
-                      Uniquement les emails universitaires (.ac.ma ou .edu.ma)
+                    <div className="space-y-3">
+                      <label className="block text-sm font-semibold text-gray-900">
+                        <span className="flex items-center gap-2">
+                          <Mail className="h-5 w-5 text-blue-600" />
+                          Email universitaire
+                        </span>
+                      </label>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <Mail className={`h-5 w-5 transition-colors ${
+                            errors.email ? 'text-red-500' : 
+                            formData.email && !errors.email ? 'text-green-500' : 'text-gray-400 group-hover:text-blue-500'
+                          }`} />
+                        </div>
+                        <input
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          onBlur={() => handleBlur('email')}
+                          className={`block w-full pl-12 pr-10 py-4 rounded-xl border-2 transition-all duration-300 focus:ring-0 focus:outline-none focus:border-blue-500 ${
+                            errors.email 
+                              ? 'border-red-300 bg-red-50' 
+                              : formData.email && !errors.email
+                              ? 'border-green-300 bg-green-50'
+                              : 'border-gray-300 bg-gray-50 group-hover:border-blue-400'
+                          }`}
+                          placeholder="nom.prenom@universite.ac.ma"
+                        />
+                        {formData.email && !errors.email && (
+                          <div className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                            <CheckCircle2 className="h-5 w-5 text-green-500" />
+                          </div>
+                        )}
+                      </div>
+                      {errors.email && touched.email && (
+                        <p className="text-sm text-red-600 flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4" />
+                          {errors.email}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <Shield className="h-3 w-3" />
+                        Uniquement les emails universitaires (.ac.ma ou .edu.ma)
+                      </div>
                     </div>
 
                     {/* Password */}
-                    <label className="block text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <Lock className="h-5 w-5 text-blue-600" />
-                      Mot de passe
-                    </label>
-                    <PasswordInput
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      onBlur={() => handleBlur('password')}
-                      placeholder="Minimum 8 caractères"
-                      error={errors.password}
-                      touched={touched.password}
-                      show={showPassword}
-                      toggleShow={() => setShowPassword(!showPassword)}
-                    />
+                    <div className="space-y-3">
+                      <label className="block text-sm font-semibold text-gray-900">
+                        <span className="flex items-center gap-2">
+                          <Lock className="h-5 w-5 text-blue-600" />
+                          Mot de passe
+                        </span>
+                      </label>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <Lock className={`h-5 w-5 transition-colors ${
+                            errors.password ? 'text-red-500' : 
+                            formData.password && !errors.password ? 'text-green-500' : 'text-gray-400 group-hover:text-blue-500'
+                          }`} />
+                        </div>
+                        <input
+                          name="password"
+                          type={showPassword ? 'text' : 'password'}
+                          value={formData.password}
+                          onChange={handleChange}
+                          onBlur={() => handleBlur('password')}
+                          className={`block w-full pl-12 pr-12 py-4 rounded-xl border-2 transition-all duration-300 focus:ring-0 focus:outline-none focus:border-blue-500 ${
+                            errors.password 
+                              ? 'border-red-300 bg-red-50' 
+                              : formData.password && !errors.password
+                              ? 'border-green-300 bg-green-50'
+                              : 'border-gray-300 bg-gray-50 group-hover:border-blue-400'
+                          }`}
+                          placeholder="Minimum 8 caractères"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                          ) : (
+                            <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                          )}
+                        </button>
+                      </div>
+                      {errors.password && touched.password && (
+                        <p className="text-sm text-red-600 flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4" />
+                          {errors.password}
+                        </p>
+                      )}
                       
                       {formData.password && (
                         <div className="space-y-2">
@@ -967,27 +922,60 @@ export default function Register() {
                     </div>
 
                     {/* Confirm Password */}
-                    <label className="block text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <Lock className="h-5 w-5 text-blue-600" />
-                      Confirmer le mot de passe
-                    </label>
-                    <PasswordInput
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      onBlur={() => handleBlur('confirmPassword')}
-                      placeholder="Retapez votre mot de passe"
-                      error={errors.confirmPassword}
-                      touched={touched.confirmPassword}
-                      show={showConfirmPassword}
-                      toggleShow={() => setShowConfirmPassword(!showConfirmPassword)}
-                    />
-                    {formData.confirmPassword && !errors.confirmPassword && (
-                      <p className="text-sm text-green-600 flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4" />
-                        Les mots de passe correspondent parfaitement
-                      </p>
-                    )}
+                    <div className="space-y-3">
+                      <label className="block text-sm font-semibold text-gray-900">
+                        <span className="flex items-center gap-2">
+                          <Lock className="h-5 w-5 text-blue-600" />
+                          Confirmer le mot de passe
+                        </span>
+                      </label>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <Lock className={`h-5 w-5 transition-colors ${
+                            errors.confirmPassword ? 'text-red-500' : 
+                            formData.confirmPassword && !errors.confirmPassword ? 'text-green-500' : 'text-gray-400 group-hover:text-blue-500'
+                          }`} />
+                        </div>
+                        <input
+                          name="confirmPassword"
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          value={formData.confirmPassword}
+                          onChange={handleChange}
+                          onBlur={() => handleBlur('confirmPassword')}
+                          className={`block w-full pl-12 pr-12 py-4 rounded-xl border-2 transition-all duration-300 focus:ring-0 focus:outline-none focus:border-blue-500 ${
+                            errors.confirmPassword 
+                              ? 'border-red-300 bg-red-50' 
+                              : (formData.confirmPassword && !errors.confirmPassword)
+                              ? 'border-green-300 bg-green-50'
+                              : 'border-gray-300 bg-gray-50 group-hover:border-blue-400'
+                          }`}
+                          placeholder="Retapez votre mot de passe"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute inset-y-0 right-0 pr-4 flex items-center"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                          ) : (
+                            <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                          )}
+                        </button>
+                      </div>
+                      {errors.confirmPassword && touched.confirmPassword && (
+                        <p className="text-sm text-red-600 flex items-center gap-2">
+                          <AlertCircle className="h-4 w-4" />
+                          {errors.confirmPassword}
+                        </p>
+                      )}
+                      {formData.confirmPassword && !errors.confirmPassword && (
+                        <p className="text-sm text-green-600 flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4" />
+                          Les mots de passe correspondent parfaitement
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -1003,11 +991,15 @@ export default function Register() {
                       </label>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {moroccanUniversities.map((uni) => (
-                          <SelectCard
+                          <button
                             key={uni.id}
-                            selected={formData.university === uni.id}
+                            type="button"
                             onClick={() => handleUniversitySelect(uni)}
-                            className="relative text-left overflow-hidden"
+                            className={`group relative p-4 rounded-2xl border-2 text-left transition-all duration-300 overflow-hidden ${
+                              formData.university === uni.id
+                                ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg scale-[1.02]'
+                                : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
+                            }`}
                           >
                             <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                               {formData.university === uni.id ? (
@@ -1020,6 +1012,7 @@ export default function Register() {
                                 </div>
                               )}
                             </div>
+                            
                             <div className="flex items-start gap-4">
                               <div className={`w-14 h-14 ${uni.color} rounded-xl flex items-center justify-center text-2xl shadow-lg`}>
                                 {uni.logo}
@@ -1033,7 +1026,7 @@ export default function Register() {
                                 <div className="text-xs text-gray-500 mt-2">{uni.students} étudiants</div>
                               </div>
                             </div>
-                          </SelectCard>
+                          </button>
                         ))}
                       </div>
                       {errors.university && touched.university && (
@@ -1054,10 +1047,15 @@ export default function Register() {
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {moroccanFaculties.map((faculty) => (
-                          <SelectCard
+                          <button
                             key={faculty.id}
-                            selected={formData.faculty === faculty.id}
+                            type="button"
                             onClick={() => handleFacultySelect(faculty)}
+                            className={`group p-4 rounded-xl border-2 transition-all duration-300 ${
+                              formData.faculty === faculty.id
+                                ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg'
+                                : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                            }`}
                           >
                             <div className="flex items-center gap-4">
                               <div className={`w-12 h-12 ${faculty.color} rounded-lg flex items-center justify-center text-xl`}>
@@ -1076,7 +1074,7 @@ export default function Register() {
                                 <CheckCircle2 className="h-5 w-5 text-blue-500" />
                               )}
                             </div>
-                          </SelectCard>
+                          </button>
                         ))}
                       </div>
                       {errors.faculty && touched.faculty && (
@@ -1097,16 +1095,20 @@ export default function Register() {
                       </label>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         {studyLevels.map((level) => (
-                          <SelectCard
+                          <button
                             key={level.id}
-                            selected={formData.studyLevel === level.id}
+                            type="button"
                             onClick={() => handleStudyLevelSelect(level)}
-                            className="text-center"
+                            className={`p-4 rounded-xl border-2 text-center transition-all duration-300 ${
+                              formData.studyLevel === level.id
+                                ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg transform scale-105'
+                                : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                            }`}
                           >
                             <div className="text-2xl mb-2">{level.emoji}</div>
                             <div className="font-bold text-gray-900 text-sm">{level.name}</div>
                             <div className="text-xs text-gray-500 mt-1">{level.level}</div>
-                          </SelectCard>
+                          </button>
                         ))}
                       </div>
                       {errors.studyLevel && touched.studyLevel && (
@@ -1195,16 +1197,29 @@ export default function Register() {
                         Sélectionnez vos centres d'intérêt pour recevoir des recommandations personnalisées
                       </p>
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                        {interests.map((interest) => (
-                          <InterestPill
-                            key={interest.id}
-                            selected={selectedInterests.includes(interest.id)}
-                            onClick={() => toggleInterest(interest.id)}
-                            Icon={interest.icon}
-                            name={interest.name}
-                            color={interest.color}
-                          />
-                        ))}
+                        {interests.map((interest) => {
+                          const Icon = interest.icon;
+                          const isSelected = selectedInterests.includes(interest.id);
+                          return (
+                            <button
+                              key={interest.id}
+                              type="button"
+                              onClick={() => toggleInterest(interest.id)}
+                              className={`group p-4 rounded-xl border-2 transition-all duration-300 ${
+                                isSelected
+                                  ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg'
+                                  : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                              }`}
+                            >
+                              <div className="flex flex-col items-center gap-2">
+                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isSelected ? `bg-gradient-to-r ${interest.color} text-white` : 'bg-gray-100 text-gray-600'}`}>
+                                  <Icon className="h-6 w-6" />
+                                </div>
+                                <div className="text-sm font-medium text-gray-900">{interest.name}</div>
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                       {selectedInterests.length > 0 && (
                         <div className="text-sm text-green-600 flex items-center gap-2">
@@ -1384,4 +1399,4 @@ export default function Register() {
       </div>
     </div>
   );
-};
+}

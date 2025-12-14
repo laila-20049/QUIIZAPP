@@ -9,14 +9,20 @@ const ForumQuestionCard = ({ question }) => {
   return (
     <Link
       to={`/forum/question/${question.id}`}
-      className="block bg-white dark:bg-gray-800 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300 hover:shadow-lg p-6 group"
+      className={`block w-full pl-12 pr-12 py-4 rounded-xl border-2 transition-all duration-300 focus:ring-0 focus:outline-none focus:border-blue-500 ${
+        errors.confirmPassword
+          ? 'border-red-300 bg-red-50'
+          : formData.confirmPassword && !errors.confirmPassword
+          ? 'border-green-300 bg-green-50'
+          : 'border-gray-300 bg-gray-50 group-hover:border-blue-400'
+      }`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
             {question.title}
           </h3>
-          
+
           <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
             {question.content}
           </p>
@@ -26,7 +32,7 @@ const ForumQuestionCard = ({ question }) => {
               <User className="h-4 w-4" />
               <span className="font-medium">{question.author}</span>
             </div>
-            
+
             <div className="flex items-center gap-1.5">
               <Clock className="h-4 w-4" />
               <span>{formatDate(question.createdAt)}</span>
@@ -39,7 +45,13 @@ const ForumQuestionCard = ({ question }) => {
 
             <div className="flex items-center gap-1.5">
               <MessageCircle className="h-4 w-4" />
-              <span className={answerCount > 0 ? 'text-green-600 dark:text-green-400 font-semibold' : ''}>
+              <span
+                className={
+                  answerCount > 0
+                    ? 'text-green-600 dark:text-green-400 font-semibold'
+                    : ''
+                }
+              >
                 {answerCount} {answerCount === 1 ? 'réponse' : 'réponses'}
               </span>
             </div>
