@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   Home,
@@ -315,13 +315,15 @@ const Layout = ({ children, showAdminSidebar = false }) => {
     );
   };
 
+  const content = children ?? <Outlet />;
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 overflow-x-hidden transition-colors duration-200">
       <MobileMenu />
       <Sidebar />
       
       {/* Main Content */}
-      <div className={showAdminSidebar ? "lg:pl-64" : "lg:pl-64"}>
+      <div className="transition-all duration-300 md:pl-[260px]">
         {/* Top Navigation */}
         <header className="sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800">
           <div className="px-4 sm:px-6 lg:px-8">
@@ -516,9 +518,11 @@ const Layout = ({ children, showAdminSidebar = false }) => {
         </header>
         
         {/* Main Content */}
-        <main className="flex-1">
-          <div className="py-8 px-4 sm:px-6 lg:px-8">
-            {children}
+        <main className="flex-1 w-full">
+          <div className="py-8 px-4 sm:px-6 lg:px-8 w-full">
+            <div className="max-w-7xl mx-auto w-full space-y-6">
+              {content}
+            </div>
           </div>
         </main>
       </div>

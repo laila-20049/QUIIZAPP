@@ -38,9 +38,16 @@ const Sidebar = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  const NavItem = ({ item, collapsed }) => (
+  const handleNavClick = () => {
+    if (isMobileOpen) {
+      setIsMobileOpen(false);
+    }
+  };
+
+  const NavItem = ({ item, collapsed, onNavigate }) => (
     <NavLink
       to={item.path}
+      onClick={onNavigate}
       className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
         isActive(item.path)
           ? `bg-gradient-to-r ${item.color} text-white shadow-lg scale-105`
@@ -75,7 +82,7 @@ const Sidebar = () => {
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="fixed top-4 left-4 z-40 lg:hidden bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded-lg hover:shadow-lg transition-all"
+        className="fixed top-4 left-4 z-40 md:hidden bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded-lg hover:shadow-lg transition-all"
       >
         {isMobileOpen ? <ChevronLeft size={24} /> : <ChevronRight size={24} />}
       </button>
@@ -83,7 +90,7 @@ const Sidebar = () => {
       {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
@@ -91,8 +98,8 @@ const Sidebar = () => {
       {/* Sidebar Principal */}
       <aside
         className={`fixed left-0 top-0 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 z-40 lg:z-30 ${
-          isCollapsed ? 'w-20' : 'w-64'
-        } ${isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+          isCollapsed ? 'w-20' : 'w-[260px]'
+        } ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
       >
         {/* Header avec Logo/Brand */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
@@ -148,7 +155,7 @@ const Sidebar = () => {
         {/* Menu Principal */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-2">
           {menuItems.map((item) => (
-            <NavItem key={item.path} item={item} collapsed={isCollapsed} />
+            <NavItem key={item.path} item={item} collapsed={isCollapsed} onNavigate={handleNavClick} />
           ))}
         </nav>
 
@@ -158,7 +165,7 @@ const Sidebar = () => {
         {/* Menu Bas */}
         <nav className="px-3 py-4 space-y-2 border-t border-gray-200 dark:border-gray-700">
           {bottomItems.map((item) => (
-            <NavItem key={item.path} item={item} collapsed={isCollapsed} />
+            <NavItem key={item.path} item={item} collapsed={isCollapsed} onNavigate={handleNavClick} />
           ))}
         </nav>
 
@@ -184,7 +191,7 @@ const Sidebar = () => {
       </aside>
 
       {/* Spacer pour contenu principal (desktop) */}
-      <div className={`hidden lg:block transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`} />
+      <div className={`hidden md:block transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-[260px]'}`} />
     </>
   );
 };

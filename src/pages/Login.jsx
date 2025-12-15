@@ -76,8 +76,12 @@ const Login = () => {
   // Animation d'entrée
   useEffect(() => {
     setAnimateIn(true);
-    clearError();
-  }, [clearError]);
+    if (typeof clearError === 'function') {
+      clearError();
+    }
+    // Run once on mount to avoid rerender loops if clearError identity changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Redirection après connexion
   const from = location.state?.from?.pathname || '/dashboard';
