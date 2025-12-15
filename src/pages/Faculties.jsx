@@ -44,7 +44,7 @@ import {
   Hash
 } from 'lucide-react';
 import { useDatabase } from '../hooks/useDatabase';
-import LoadingSpinner from '../components/LoadingSpinner';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const Faculties = ({ 
   onFacultySelect,

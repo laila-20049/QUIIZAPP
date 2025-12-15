@@ -24,7 +24,94 @@ import {
   Layers,
   BarChart3
 } from 'lucide-react';
-import Modules from './components/Modules';
+// Inline module list component to avoid missing file issues and keep layout
+const ModulesList = ({
+  selectedLevel,
+  selectedFaculty,
+  selectedCategories,
+  searchQuery,
+  sortBy,
+  sortOrder,
+  viewMode,
+  mode = 'browse',
+}) => {
+  // Sample dataset (can be replaced by API later)
+  const modules = [
+    { id: 1, title: 'Analyse 1', faculty: 'Faculté des Sciences', level: 'S1', category: 'math', rating: 4.7, students: 1200 },
+    { id: 2, title: 'Algèbre Linéaire', faculty: 'Faculté des Sciences', level: 'S1', category: 'math', rating: 4.6, students: 980 },
+    { id: 3, title: 'Programmation C', faculty: 'Faculté des Sciences et Techniques', level: 'S2', category: 'computer', rating: 4.5, students: 1500 },
+    { id: 4, title: 'Économie Générale', faculty: 'Faculté des Sciences Économiques', level: 'S3', category: 'economics', rating: 4.3, students: 860 },
+    { id: 5, title: 'Droit Constitutionnel', faculty: 'Faculté de Droit', level: 'S2', category: 'law', rating: 4.4, students: 730 },
+  ];
+
+  const filtered = modules
+    .filter(m => !selectedLevel || m.level === selectedLevel)
+    .filter(m => !selectedFaculty || m.faculty === selectedFaculty)
+    .filter(m => selectedCategories.length === 0 || selectedCategories.includes(m.category))
+    .filter(m => !searchQuery || m.title.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  const sorted = [...filtered].sort((a, b) => {
+    switch (sortBy) {
+      case 'alphabetical':
+        return sortOrder === 'asc' ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title);
+      case 'recent':
+      case 'popularity':
+        return sortOrder === 'asc' ? a.students - b.students : b.students - a.students;
+      case 'rating':
+        return sortOrder === 'asc' ? a.rating - b.rating : b.rating - a.rating;
+      default:
+        return 0;
+    }
+  });
+
+  const Card = ({ module }) => (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between">
+        <div>
+          <h4 className="font-semibold text-gray-900">{module.title}</h4>
+          <p className="text-sm text-gray-600 mt-1">{module.faculty} • {module.level}</p>
+        </div>
+        <div className="text-sm font-medium text-amber-600">⭐ {module.rating}</div>
+      </div>
+      <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
+        <span>{module.students.toLocaleString()} étudiants</span>
+        <span className="px-2 py-1 bg-gray-100 rounded-lg">{module.category}</span>
+      </div>
+      {mode === 'browse' && (
+        <button className="mt-4 inline-flex items-center gap-2 text-sm text-indigo-600 hover:text-indigo-800">
+          <Eye className="h-4 w-4" />
+          Voir le module
+        </button>
+      )}
+    </div>
+  );
+
+  if (sorted.length === 0) {
+    return (
+      <div className="mt-8 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center text-gray-600">
+        Aucun module trouvé avec ces filtres.
+      </div>
+    );
+  }
+
+  if (viewMode === 'list') {
+    return (
+      <div className="mt-8 space-y-4">
+        {sorted.map(module => (
+          <Card key={module.id} module={module} />
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {sorted.map(module => (
+        <Card key={module.id} module={module} />
+      ))}
+    </div>
+  );
+};
 
 const ModuleBrowser = () => {
   const [selectedFaculty, setSelectedFaculty] = useState(null);
@@ -398,7 +485,7 @@ const ModuleBrowser = () => {
           </div>
 
           {/* Liste des modules */}
-          <Modules 
+          <ModulesList 
             selectedLevel={selectedLevel}
             selectedFaculty={selectedFaculty}
             selectedCategories={selectedCategories}
@@ -407,7 +494,6 @@ const ModuleBrowser = () => {
             sortOrder={sortOrder}
             viewMode={viewMode}
             mode="browse"
-            showFilters={false}
           />
 
           {/* Suggestions */}
