@@ -1,5 +1,9 @@
 {
   "routes": [
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/(.*)\\.(js|css|png|jpg|jpeg|gif|svg|ico|webp|avif|woff|woff2)", "dest": "/$1.$2" },
+    { "src": "/favicon.ico", "dest": "/favicon.ico" },
+    { "src": "/robots.txt", "dest": "/robots.txt" },
     { "src": "/(.*)", "dest": "/" }
   ]
 }
