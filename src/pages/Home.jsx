@@ -38,7 +38,8 @@ import {
   Building,
   CheckCircle,
   ArrowUpRight,
-  ExternalLink
+  ExternalLink,
+  HelpCircle
 } from 'lucide-react';
 
 const Home = () => {
@@ -857,6 +858,62 @@ const Home = () => {
             <div>
               <div className="text-2xl font-bold">📱</div>
               <div className="text-sm text-gray-300 mt-2">Mobile Friendly</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Forum Discussion Section */}
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="relative rounded-3xl overflow-hidden border border-white/10 backdrop-blur-sm">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10" />
+            
+            <div className="relative p-12 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 mb-6">
+                <MessageCircle className="h-8 w-8 text-white" />
+              </div>
+              
+              <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Forum de discussion
+              </h2>
+              
+              <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+                Rejoignez la discussion, posez vos questions et partagez vos connaissances avec la communauté
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link 
+                  to="/forum" 
+                  className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  Accéder au forum
+                </Link>
+                <Link 
+                  to="/faq" 
+                  className="border-2 border-white/30 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/10 transition-all duration-300 flex items-center justify-center gap-3"
+                >
+                  <HelpCircle className="h-5 w-5" />
+                  Voir les questions fréquentes
+                </Link>
+              </div>
+              
+              {/* Forum Stats */}
+              <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10">
+                  <div className="text-3xl font-bold text-indigo-400 mb-2">2,450+</div>
+                  <div className="text-sm text-gray-300">Questions posées</div>
+                </div>
+                <div className="bg-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10">
+                  <div className="text-3xl font-bold text-purple-400 mb-2">8,900+</div>
+                  <div className="text-sm text-gray-300">Réponses partagées</div>
+                </div>
+                <div className="bg-white/5 rounded-xl p-6 backdrop-blur-sm border border-white/10">
+                  <div className="text-3xl font-bold text-pink-400 mb-2">15,000+</div>
+                  <div className="text-sm text-gray-300">Membres actifs</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

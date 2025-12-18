@@ -38,7 +38,7 @@ export const Database = {
       firstName: "Fatima",
       lastName: "Zahra",
       role: "student",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150",
+      avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234f46e5'/%3E%3Cstop offset='100%25' style='stop-color:%239333ea'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='150' height='150' fill='url(%23g)'/%3E%3C/svg%3E",
       universityId: 2,
       facultyId: 3,
       level: "S3",
@@ -68,7 +68,7 @@ export const Database = {
       firstName: "Dr. Mohammed",
       lastName: "Berrada",
       role: "professor",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
+      avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2306b6d4'/%3E%3Cstop offset='100%25' style='stop-color:%233b82f6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='150' height='150' fill='url(%23g)'/%3E%3C/svg%3E",
       universityId: 1,
       facultyId: 2,
       level: null,
@@ -97,7 +97,7 @@ export const Database = {
       firstName: "Karim",
       lastName: "Alami",
       role: "student",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+      avatar: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2310b981'/%3E%3Cstop offset='100%25' style='stop-color:%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='150' height='150' fill='url(%23g)'/%3E%3C/svg%3E",
       universityId: 3,
       facultyId: 5,
       level: "S4",
@@ -278,7 +278,7 @@ export const Database = {
         "Introduction à la POO"
       ],
       prerequisites: ["Aucun prérequis nécessaire"],
-      coverImage: "https://images.unsplash.com/photo-1526379879527-8559ecfcaec1?w=800&h=400&fit=crop",
+      coverImage: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%231e40af'/%3E%3Cstop offset='100%25' style='stop-color:%237c3aed'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='400' fill='url(%23g)'/%3E%3C/svg%3E",
       language: "fr",
       estimatedTime: "30 minutes",
       category: "Informatique"
@@ -314,7 +314,7 @@ export const Database = {
         "Déployer des modèles en production"
       ],
       prerequisites: ["Bases en Python", "Concepts ML", "Algèbre linéaire"],
-      coverImage: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=400&fit=crop",
+      coverImage: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23059669'/%3E%3Cstop offset='100%25' style='stop-color:%231e40af'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='400' fill='url(%23g)'/%3E%3C/svg%3E",
       language: "fr",
       estimatedTime: "1 heure 15 minutes",
       category: "Informatique"
@@ -350,7 +350,7 @@ export const Database = {
         "Résoudre des systèmes linéaires"
       ],
       prerequisites: ["Algèbre élémentaire"],
-      coverImage: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&h=400&fit=crop",
+      coverImage: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='400'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23dc2626'/%3E%3Cstop offset='100%25' style='stop-color:%23ea580c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='400' fill='url(%23g)'/%3E%3C/svg%3E",
       language: "fr",
       estimatedTime: "45 minutes",
       category: "Mathématiques"

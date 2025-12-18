@@ -1,0 +1,9 @@
+Question {
+  id, title, content, author, createdAt, tags[], views
+}
+Answer {
+  id, questionId, content, author, createdAt, upvotes, comments[]
+}
+Comment {
+  id, answerId, content, author, createdAt
+}

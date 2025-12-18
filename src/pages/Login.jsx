@@ -180,7 +180,7 @@ const Login = () => {
   // Données de démonstration
   const demoAccounts = [
     { 
-      email: 'admin@quiz.ma', 
+      email: 'admin@quiz.edu.ma', 
       password: 'password123', 
       role: 'Administrateur', 
       university: 'Plateforme',
